@@ -30,4 +30,4 @@ Here is my screenshot (please note that it may not be the most updated image, bu
 # Useful links
 
 * [HA cheat sheet](https://github.com/arsaboo/homeassistant-config/blob/master/HASS%20Cheatsheet.md) for miscellaneous tips and tricks.
-* The idea for this repo was taken from [arsaboo/homeassistant-config](https://github.com/arsaboo/homeassistant-config/blob/master/HASS%20Cheatsheet.md)
+* The idea for this repo was taken from [arsaboo/homeassistant-config](https://github.com/arsaboo/homeassistant-config)
