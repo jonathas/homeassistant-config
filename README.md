@@ -23,7 +23,7 @@ You can check my current HA version [here](.HA_VERSION). If you like anything he
 
 ## My Home Assistant dashboard
 
-Here are some screenshots (please note that these may not be the most updated images, but you should get an idea).
+Here is my screenshot (please note that it may not be the most updated image, but you should get an idea).
 
 <img src="./ha_ss_1.png" alt="Home Assistant dashboard" />
 
