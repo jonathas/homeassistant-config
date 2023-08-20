@@ -1,0 +1,248 @@
+- id: '1691842594162'
+  alias: Hall light (Motion)
+  description: ''
+  use_blueprint:
+    path: homeassistant/motion_light.yaml
+    input:
+      motion_entity: binary_sensor.front_door_motion_sensor_motion
+      light_target:
+        device_id: 874292888d49081c268ee8e27b9c2605
+- id: '1691847438428'
+  alias: Turn CPAP off (Daily schedule)
+  description: ''
+  trigger:
+  - platform: time
+    at: '10:00:00'
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 17934490a668e65a95553640b6008c91
+    entity_id: 43d1d1a68fd918946da31e901540b4f6
+    domain: switch
+  - service: notify.mobile_app_jon_iphone
+    data:
+      message: CPAP off
+      title: Automation
+  mode: single
+- id: '1691848308714'
+  alias: Amaya is up (NFC)
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: b1df81f5-ba8f-4ee2-8a58-cbfee709cf20
+  condition: []
+  action:
+  - type: turn_on
+    device_id: dd62ddc5b747cdaf29a815419cb989f4
+    entity_id: 2e486700a34beb8e888e44c0b89665ba
+    domain: light
+  mode: single
+- id: '1691957631259'
+  alias: Run bathroom fan (NFC)
+  description: For 5 minutes
+  trigger:
+  - platform: tag
+    tag_id: 61d92c29-9aa4-46e6-acff-eae3a0eec044
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 53b0f001e380e99402db43c79099a703
+    entity_id: 0e50149fed819e0d0cd7d540173f3ada
+    domain: light
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: 53b0f001e380e99402db43c79099a703
+    entity_id: 0e50149fed819e0d0cd7d540173f3ada
+    domain: light
+  mode: single
+- id: '1691960330122'
+  alias: Movie Night (NFC)
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: 4a235380-62f0-4024-8405-2a3937920ae2
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 0d0dd790e6a8e73a56a5e35c841d9cec
+    entity_id: 649c7ae0063c4fda1b15913be3170e2f
+    domain: switch
+  - type: turn_on
+    device_id: 7de44226570dfab57e466bc22c4dc3f8
+    entity_id: fa70a94ea559a0c67eb11bb45d1c0496
+    domain: remote
+  - service: media_player.turn_on
+    data: {}
+    target:
+      device_id: 7de44226570dfab57e466bc22c4dc3f8
+  - type: turn_off
+    device_id: 0149505f3839e969313b3fdcc322bde0
+    entity_id: 6cc5dbb9a3056a17f400b64c7162dd67
+    domain: light
+  - type: turn_on
+    device_id: f9586f90a966023e326b2c40268d4c29
+    entity_id: c775fd444d108ed2e8c6aab77313a4f1
+    domain: light
+  mode: single
+- id: '1691961487180'
+  alias: ' Turn on desk lights (NFC)'
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: aee9d8aa-2b91-44df-bb4f-5c669b2d9f23
+  condition: []
+  action:
+  - type: turn_on
+    device_id: d2b26d2cbdce70789cae28fbe7fade34
+    entity_id: 2c6e19e149f391173709c66c3ea2edd4
+    domain: light
+  - type: turn_on
+    device_id: 384de0aef30160c4cd7c0a16a2bacc6e
+    entity_id: 4906acf6edf4c08abb9bff70c1ca61f4
+    domain: switch
+  mode: single
+- id: '1691961708012'
+  alias: Wind down (NFC)
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: 7497d748-45c1-4be8-9b0f-e511dc166109
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 8f3e53dcf02e7c97e18f16fb8aa48d1c
+    entity_id: ec7c26ce9ce900ada90334bfcf92cd96
+    domain: light
+  - type: turn_on
+    device_id: dd62ddc5b747cdaf29a815419cb989f4
+    entity_id: 2e486700a34beb8e888e44c0b89665ba
+    domain: light
+  - type: turn_on
+    device_id: 17934490a668e65a95553640b6008c91
+    entity_id: 43d1d1a68fd918946da31e901540b4f6
+    domain: switch
+  mode: single
+- id: '1691961908252'
+  alias: Turn off all lights (NFC)
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: b4fc42fa-294f-4fef-80d4-2e88fc9149f5
+  condition: []
+  action:
+  - service: light.turn_off
+    entity_id: all
+  mode: single
+- id: '1692386498657'
+  alias: Jon's desk light switch
+  description: ''
+  trigger:
+  - device_id: 9b9cd36aa91d63bde113aac5d20af4a5
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+  condition: []
+  action:
+  - type: toggle
+    device_id: d2b26d2cbdce70789cae28fbe7fade34
+    entity_id: 2c6e19e149f391173709c66c3ea2edd4
+    domain: light
+  mode: single
+- id: '1692386610340'
+  alias: Estela's desk light switch
+  description: ''
+  trigger:
+  - device_id: 9b9cd36aa91d63bde113aac5d20af4a5
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_2
+  condition: []
+  action:
+  - type: toggle
+    device_id: 384de0aef30160c4cd7c0a16a2bacc6e
+    entity_id: 4906acf6edf4c08abb9bff70c1ca61f4
+    domain: switch
+  mode: single
+- id: '1692387270822'
+  alias: Bedside light switch
+  description: ''
+  trigger:
+  - device_id: d0572f7c033a5d76c64c1a4eb88daeaf
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+  condition: []
+  action:
+  - type: toggle
+    device_id: dd62ddc5b747cdaf29a815419cb989f4
+    entity_id: 2e486700a34beb8e888e44c0b89665ba
+    domain: light
+  mode: single
+- id: '1692387308467'
+  alias: Bedroom's fan switch
+  description: ''
+  trigger:
+  - device_id: d0572f7c033a5d76c64c1a4eb88daeaf
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_2
+  condition: []
+  action:
+  - service: fan.toggle
+    data: {}
+    target:
+      device_id: 4c236a9e9d1f3d83850458e750d0a64b
+  mode: single
+- id: '1692439674398'
+  alias: Bedroom's fan oscilation
+  description: ''
+  trigger:
+  - device_id: d0572f7c033a5d76c64c1a4eb88daeaf
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_2
+  condition: []
+  action:
+  - service: fan.oscillate
+    data:
+      oscillating: true
+    target:
+      device_id: 4c236a9e9d1f3d83850458e750d0a64b
+  mode: single
+- id: '1692454903328'
+  alias: You've got mail (Motion)
+  description: ''
+  trigger:
+  - type: motion
+    platform: device
+    device_id: cddb8b9d37d9b2eeb8aded7e2ca691e5
+    entity_id: 2c3c4208a8b03613bd6a2d28cb9bd542
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: notify.mobile_app_jon_iphone
+    data:
+      message: You've got mail!
+      title: Mailbox
+  - service: notify.mobile_app_tablet_ags2_w09
+    data:
+      message: You've got mail!
+      title: Mailbox
+  - service: notify.mobile_app_sm_g973f
+    data:
+      message: You've got mail!
+      title: Mailbox
+  - service: notify.mobile_app_jon_macbook
+    data:
+      message: You've got mail!
+      title: Mailbox
+  mode: single
