@@ -229,20 +229,20 @@
     domain: binary_sensor
   condition: []
   action:
-  - service: notify.mobile_app_jon_iphone
+  - parallel:
+    - service: notify.mobile_app_jon_iphone
+      data:
+        message: You've got mail!
+        title: Mailbox
+    - service: notify.mobile_app_sm_g973f
+      data:
+        title: Mailbox
+        message: You've got mail!
+    - service: notify.mobile_app_tablet_ags2_w09
+      data:
+        message: You've got mail!
+        title: Mailbox
+  - service: rest_command.voice_monkey
     data:
-      message: You've got mail!
-      title: Mailbox
-  - service: notify.mobile_app_tablet_ags2_w09
-    data:
-      message: You've got mail!
-      title: Mailbox
-  - service: notify.mobile_app_sm_g973f
-    data:
-      message: You've got mail!
-      title: Mailbox
-  - service: notify.mobile_app_jon_macbook
-    data:
-      message: You've got mail!
-      title: Mailbox
+      device: youvegotmail
   mode: single

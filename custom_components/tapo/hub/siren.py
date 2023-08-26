@@ -1,32 +1,32 @@
 from math import floor
-from typing import Any, Optional, cast
+from typing import Any
+from typing import cast
+from typing import Optional
 
-from homeassistant.components.siren import (
-    ATTR_TONE,
-    ATTR_VOLUME_LEVEL,
-    SirenEntity,
-    SirenEntityFeature,
-)
+from custom_components.tapo.const import DOMAIN
+from custom_components.tapo.coordinators import HassTapoDeviceData
+from custom_components.tapo.hub.tapo_hub_coordinator import TapoHubCoordinator
+from homeassistant.components.siren import ATTR_TONE
+from homeassistant.components.siren import ATTR_VOLUME_LEVEL
+from homeassistant.components.siren import SirenEntity
+from homeassistant.components.siren import SirenEntityFeature
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from plugp100.requests.set_device_info.play_alarm_params import PlayAlarmParams
-
-from custom_components.tapo.const import DOMAIN
-from custom_components.tapo.coordinators import HassTapoDeviceData
-from custom_components.tapo.helpers import clamp, value_or_raise
-from custom_components.tapo.hub.tapo_hub_coordinator import TapoHubCoordinator
+from plugp100.responses.device_state import HubDeviceState
 
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_devices: AddEntitiesCallback
 ):
     data = cast(HassTapoDeviceData, hass.data[DOMAIN][entry.entry_id])
-    available_tones = value_or_raise(
-        await data.coordinator.device.get_supported_alarm_tones()
-    ).tones
+    available_tones = (
+        (await data.coordinator.device.get_supported_alarm_tones()).get_or_raise().tones
+    )
     async_add_devices([HubSiren(data.coordinator, available_tones)], True)
 
 
@@ -51,7 +51,7 @@ class HubSiren(CoordinatorEntity[TapoHubCoordinator], SirenEntity):
 
     @property
     def unique_id(self):
-        return self.coordinator.data and self.coordinator.data.info.device_id
+        return self.coordinator.device_info and self.coordinator.device_info.device_id
 
     @property
     def name(self):
@@ -59,11 +59,13 @@ class HubSiren(CoordinatorEntity[TapoHubCoordinator], SirenEntity):
 
     @property
     def device_info(self) -> DeviceInfo | None:
-        return DeviceInfo(identifiers={(DOMAIN, self.coordinator.data.info.device_id)})
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.coordinator.device_info.device_id)}
+        )
 
     @property
     def is_on(self) -> Optional[bool]:
-        return self.coordinator.data and self.coordinator.data.in_alarm
+        return self.coordinator.get_state_of(HubDeviceState).in_alarm
 
     async def async_turn_on(self, **kwargs):
         volume = _map_volume_to_discrete_values(
@@ -71,11 +73,11 @@ class HubSiren(CoordinatorEntity[TapoHubCoordinator], SirenEntity):
         )
         tone = kwargs.get(ATTR_TONE, None)
         play_alarm = PlayAlarmParams(alarm_volume=volume, alarm_type=tone)
-        value_or_raise(await self.coordinator.device.turn_alarm_on(play_alarm))
+        (await self.coordinator.device.turn_alarm_on(play_alarm)).get_or_raise()
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs):
-        value_or_raise(await self.coordinator.device.turn_alarm_off())
+        (await self.coordinator.device.turn_alarm_off()).get_or_raise()
         await self.coordinator.async_request_refresh()
 
 
