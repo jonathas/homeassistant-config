@@ -1,0 +1,45 @@
+blueprint:
+  name: Smoke Alert
+  description: Push notification (mobile App) + persistent notification will be sent
+    as soon as one of the selected sensors detects smoke.
+  domain: automation
+  input:
+    sensor:
+      name: Smoke Sensor
+      description: List of Smoke Sensors
+      selector:
+        entity:
+          multiple: true
+          device_class:
+          - smoke
+    titel:
+      name: Titel
+      description: Titel of the notification - by example !! FIRE ALERT !!
+      default: ' !! FIRE ALERT !!'
+      selector:
+        text: {}
+    text:
+      name: Text
+      description: Text Message. This message will be added to the name of the sensor
+        [sensor name] [text message].
+      default: ' has detected Smoke!'
+      selector:
+        text: {}
+  source_url: https://gist.github.com/user-x-adm/9043f55d283eb437e92c89d78cb30ddf
+trigger:
+- platform: state
+  entity_id: !input sensor
+  to: 'on'
+condition: []
+variables:
+  text_var: !input text
+action:
+- service: notify.notify
+  data:
+    title: !input titel
+    message: '{{trigger.to_state.name}} {{text_var}}'
+- service: notify.persistent_notification
+  data:
+    title: !input titel
+    message: '{{trigger.to_state.name}} {{text_var}}'
+mode: single

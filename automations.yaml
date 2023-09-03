@@ -4,15 +4,15 @@
   use_blueprint:
     path: homeassistant/motion_light.yaml
     input:
-      motion_entity: binary_sensor.front_door_motion_sensor_motion
       light_target:
         device_id: 874292888d49081c268ee8e27b9c2605
+      motion_entity: binary_sensor.front_door_motion_sensor_motion
 - id: '1691847438428'
   alias: Turn CPAP off (Daily schedule)
   description: ''
   trigger:
   - platform: time
-    at: '10:00:00'
+    at: '10:10:00'
   condition: []
   action:
   - type: turn_off
@@ -245,4 +245,68 @@
   - service: rest_command.voice_monkey
     data:
       device: youvegotmail
+  mode: single
+- id: '1693585613915'
+  alias: Low battery on sensors notification
+  description: ''
+  use_blueprint:
+    path: gmlupatelli/low_battery_notification.yaml
+    input:
+      actions:
+      - parallel:
+        - service: notify.mobile_app_jon_iphone
+          data:
+            title: Low battery on sensors
+            message: 'The following sensors are running out of battery: {{sensors}}'
+        - service: notify.mobile_app_tablet_ags2_w09
+          data:
+            title: Low battery on sensors
+            message: 'The following sensors are running out of battery: {{sensors}}'
+        - service: notify.persistent_notification
+          data:
+            title: Low battery on sensors
+            message: 'The following sensors are running out of battery: {{sensors}}'
+- id: '1693585840136'
+  alias: Update notifications
+  description: ''
+  use_blueprint:
+    path: mdegat01/update_notifications.yaml
+    input:
+      update_entities:
+      - update.home_assistant_core_update
+      - update.home_assistant_operating_system_update
+      - update.home_assistant_supervisor_update
+      - update.pi_hole_core_update_available
+      - update.pi_hole_ftl_update_available
+      - update.pi_hole_web_update_available
+      mobile_app_device: 39fbc6fe1a86add10fd919a29b74ad03
+      send_to_ha: true
+- id: '1693586144323'
+  alias: Smoke alert
+  description: ''
+  use_blueprint:
+    path: user-x-adm/smoke-alert-en.yaml
+    input:
+      sensor:
+      - binary_sensor.smoke_sensor_hall_smoke
+- id: '1693640955673'
+  alias: Tablet battery notification
+  description: ''
+  trigger:
+  - type: battery_level
+    platform: device
+    device_id: a1bd579d0d06464d81c358e5a8e61325
+    entity_id: ad3cd6cbac5b5afda9d9763b4229053a
+    domain: sensor
+    below: 20
+  condition: []
+  action:
+  - service: notify.mobile_app_jon_iphone
+    data:
+      title: Tablet running out of battery
+      message: Time to charge the tablet!
+  - service: notify.mobile_app_sm_g973f
+    data:
+      title: Tablet running out of battery
+      message: Time to charge the tablet!
   mode: single
