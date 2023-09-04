@@ -9,6 +9,14 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
+sensor:
+  - platform: worldclock
+    name: Prague
+    time_zone: Europe/Prague
+  - platform: worldclock
+    name: Rio
+    time_zone: America/Sao_Paulo
+
 rest_command:
   voice_monkey:
     method: POST
