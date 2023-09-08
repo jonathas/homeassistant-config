@@ -243,9 +243,16 @@
       data:
         message: You've got mail!
         title: Mailbox
+    - service: notify.alexa_media_kitchen_s_alexa
+      data:
+        message: You've got mail!
+    - service: notify.alexa_media_office_s_alexa
+      data:
+        message: You've got mail!
   - service: rest_command.voice_monkey
     data:
       device: youvegotmail
+    enabled: false
   mode: single
 - id: '1693585613915'
   alias: Low battery on sensors notification
