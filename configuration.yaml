@@ -23,3 +23,11 @@ rest_command:
     url: "http://192.168.0.68:9000/triggers"
     payload: '{"device":"{{device}}"}'
     content_type: "application/json; charset=utf-8"
+
+climate:
+  - platform: miheater
+    host: 192.168.0.52
+    token: !secret miheater_token
+    name: xiaomi_heater
+    model: zhimi.heater.mc2
+

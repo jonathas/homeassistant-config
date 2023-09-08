@@ -8,7 +8,7 @@
         device_id: 874292888d49081c268ee8e27b9c2605
       motion_entity: binary_sensor.front_door_motion_sensor_motion
 - id: '1691847438428'
-  alias: Turn CPAP off (Daily schedule)
+  alias: Turn sleep machine off (Daily schedule)
   description: ''
   trigger:
   - platform: time
@@ -36,6 +36,7 @@
     device_id: dd62ddc5b747cdaf29a815419cb989f4
     entity_id: 2e486700a34beb8e888e44c0b89665ba
     domain: light
+    brightness_pct: 20
   mode: single
 - id: '1691957631259'
   alias: Run bathroom fan (NFC)
