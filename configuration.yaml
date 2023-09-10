@@ -17,13 +17,6 @@ sensor:
     name: Rio
     time_zone: America/Sao_Paulo
 
-rest_command:
-  voice_monkey:
-    method: POST
-    url: "http://192.168.0.68:9000/triggers"
-    payload: '{"device":"{{device}}"}'
-    content_type: "application/json; charset=utf-8"
-
 climate:
   - platform: miheater
     host: 192.168.0.52

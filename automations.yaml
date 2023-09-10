@@ -21,7 +21,7 @@
     domain: switch
   - service: notify.mobile_app_jon_iphone
     data:
-      message: CPAP off
+      message: Sleep machine off
       title: Automation
   mode: single
 - id: '1691848308714'
@@ -249,10 +249,6 @@
     - service: notify.alexa_media_office_s_alexa
       data:
         message: You've got mail!
-  - service: rest_command.voice_monkey
-    data:
-      device: youvegotmail
-    enabled: false
   mode: single
 - id: '1693585613915'
   alias: Low battery on sensors notification
@@ -297,6 +293,8 @@
     input:
       sensor:
       - binary_sensor.smoke_sensor_hall_smoke
+      - binary_sensor.smart_siren_smoke
+      text: ' has detected Smoke! Call 150 (Fire brigade)!'
 - id: '1693640955673'
   alias: Tablet battery notification
   description: ''
@@ -317,4 +315,21 @@
     data:
       title: Tablet running out of battery
       message: Time to charge the tablet!
+  mode: single
+- id: '1694340353314'
+  alias: Leaving Home NFC (arm away)
+  description: Arms the alarm when leaving home
+  trigger:
+  - platform: tag
+    tag_id: 0b0e1a57-e751-43f5-a884-611e0098a749
+  condition:
+  - condition: state
+    entity_id: input_boolean.alarm_toggle
+    state: 'off'
+  action:
+  - service: alarm_control_panel.alarm_arm_away
+    data:
+      code: !secret alarm_code
+    target:
+      entity_id: alarm_control_panel.alarmo
   mode: single
