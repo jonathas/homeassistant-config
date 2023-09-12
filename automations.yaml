@@ -294,6 +294,8 @@
       sensor:
       - binary_sensor.smoke_sensor_hall_smoke
       - binary_sensor.smart_siren_smoke
+      - binary_sensor.smoke_sensor_office_smoke
+      - binary_sensor.smoke_sensor_living_room_smoke
       text: ' has detected Smoke! Call 150 (Fire brigade)!'
 - id: '1693640955673'
   alias: Tablet battery notification
@@ -329,7 +331,24 @@
   action:
   - service: alarm_control_panel.alarm_arm_away
     data:
-      code: !secret alarm_code
+      code: '7311'
     target:
       entity_id: alarm_control_panel.alarmo
+  mode: single
+- id: '1694375599058'
+  alias: Jon-iPhone finished charging
+  description: ''
+  trigger:
+  - type: battery_level
+    platform: device
+    device_id: 39fbc6fe1a86add10fd919a29b74ad03
+    entity_id: d9427734923da9fc6feeda6b593af551
+    domain: sensor
+    above: 99
+  condition: []
+  action:
+  - service: notify.mobile_app_jon_iphone
+    data:
+      message: iPhone finished charging!
+      title: Jon-iPhone charger
   mode: single
