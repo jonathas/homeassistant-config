@@ -84,9 +84,13 @@
     device_id: 0149505f3839e969313b3fdcc322bde0
     entity_id: 6cc5dbb9a3056a17f400b64c7162dd67
     domain: light
-  - type: turn_on
+  - type: turn_off
     device_id: f9586f90a966023e326b2c40268d4c29
     entity_id: c775fd444d108ed2e8c6aab77313a4f1
+    domain: light
+  - type: turn_on
+    device_id: 17162c8a1b34b80ab8c6a06bdc90969c
+    entity_id: 5888154a072713f62c48b0e400d291ca
     domain: light
   mode: single
 - id: '1691961487180'
@@ -342,7 +346,7 @@
   - type: battery_level
     platform: device
     device_id: 39fbc6fe1a86add10fd919a29b74ad03
-    entity_id: d9427734923da9fc6feeda6b593af551
+    entity_id: f6089c7b80e6f5f5c872af81c0063d24
     domain: sensor
     above: 99
   condition: []
@@ -351,4 +355,81 @@
     data:
       message: iPhone finished charging!
       title: Jon-iPhone charger
+  mode: single
+- id: '1694693354677'
+  alias: Hall lights (switches)
+  description: Switches for Hall lights
+  trigger:
+  - device_id: 4066dcaf920b23439f31b89dccc8a2a5
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+  - device_id: 8e8b87aee8bc614e6c8c52ae3a988815
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+  condition: []
+  action:
+  - type: toggle
+    device_id: 874292888d49081c268ee8e27b9c2605
+    entity_id: 95009e85bae32e8f32506b1e22b1a70c
+    domain: light
+  mode: single
+- id: '1694722705907'
+  alias: Kitchen counter LED strip switch
+  description: ''
+  trigger:
+  - device_id: b5881933db6e641096d92922d75edabf
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+  condition: []
+  action:
+  - type: toggle
+    device_id: 17162c8a1b34b80ab8c6a06bdc90969c
+    entity_id: 5888154a072713f62c48b0e400d291ca
+    domain: light
+  mode: single
+- id: '1694724431165'
+  alias: Bathroom LED strip ON (Motion)
+  description: ''
+  trigger:
+  - type: motion
+    platform: device
+    device_id: 4ae8515c94d49b4afaa2d04cbb5b4b94
+    entity_id: 7cc73f086e231599008fb141b46c9e93
+    domain: binary_sensor
+  condition:
+  - condition: sun
+    after: sunset
+  action:
+  - type: turn_on
+    device_id: 650cda6559668b39b1a3bd9828de9d3e
+    entity_id: b56e5b0ccfb74b74713884bc168f0747
+    domain: light
+    brightness_pct: 100
+  mode: single
+- id: '1694724531249'
+  alias: Bathroom LED strip OFF (Motion)
+  description: ''
+  trigger:
+  - type: no_motion
+    platform: device
+    device_id: 4ae8515c94d49b4afaa2d04cbb5b4b94
+    entity_id: 7cc73f086e231599008fb141b46c9e93
+    domain: binary_sensor
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: 650cda6559668b39b1a3bd9828de9d3e
+    entity_id: b56e5b0ccfb74b74713884bc168f0747
+    domain: light
   mode: single
