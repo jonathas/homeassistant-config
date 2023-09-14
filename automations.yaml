@@ -403,8 +403,15 @@
     entity_id: 7cc73f086e231599008fb141b46c9e93
     domain: binary_sensor
   condition:
-  - condition: sun
-    after: sunset
+  - condition: and
+    conditions:
+    - condition: sun
+      after: sunset
+    - condition: device
+      type: is_off
+      device_id: 53b0f001e380e99402db43c79099a703
+      entity_id: c4679ea464275c334d51c92466416432
+      domain: light
   action:
   - type: turn_on
     device_id: 650cda6559668b39b1a3bd9828de9d3e
