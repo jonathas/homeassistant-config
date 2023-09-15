@@ -175,20 +175,28 @@
     domain: switch
   mode: single
 - id: '1692387270822'
-  alias: Bedside light switch
-  description: ''
+  alias: Bedside lamp ON (60 brightness)
+  description: Press once for 60% brightness
   trigger:
   - device_id: d0572f7c033a5d76c64c1a4eb88daeaf
     domain: zha
     platform: device
     type: remote_button_short_press
     subtype: button_1
-  condition: []
+  condition:
+  - condition: state
+    entity_id: input_boolean.bedside_lamp_toggle
+    state: 'off'
   action:
-  - type: toggle
+  - type: turn_on
     device_id: dd62ddc5b747cdaf29a815419cb989f4
     entity_id: 2e486700a34beb8e888e44c0b89665ba
     domain: light
+    brightness_pct: 60
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.bedside_lamp_toggle
   mode: single
 - id: '1692387308467'
   alias: Bedroom's fan switch
@@ -405,13 +413,22 @@
   condition:
   - condition: and
     conditions:
-    - condition: sun
-      after: sunset
     - condition: device
       type: is_off
       device_id: 53b0f001e380e99402db43c79099a703
       entity_id: c4679ea464275c334d51c92466416432
       domain: light
+    - condition: time
+      after: '21:00:00'
+      before: 08:00:00
+      weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+      - sat
+      - sun
   action:
   - type: turn_on
     device_id: 650cda6559668b39b1a3bd9828de9d3e
@@ -439,4 +456,48 @@
     device_id: 650cda6559668b39b1a3bd9828de9d3e
     entity_id: b56e5b0ccfb74b74713884bc168f0747
     domain: light
+  mode: single
+- id: '1694817540849'
+  alias: Bedside lamp OFF
+  description: ''
+  trigger:
+  - device_id: d0572f7c033a5d76c64c1a4eb88daeaf
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+  condition:
+  - condition: state
+    entity_id: input_boolean.bedside_lamp_toggle
+    state: 'on'
+  action:
+  - type: turn_off
+    device_id: dd62ddc5b747cdaf29a815419cb989f4
+    entity_id: 2e486700a34beb8e888e44c0b89665ba
+    domain: light
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.bedside_lamp_toggle
+  mode: single
+- id: '1694817661674'
+  alias: Bedside lamp ON (20 brightness)
+  description: Double click for 20% brightness
+  trigger:
+  - device_id: d0572f7c033a5d76c64c1a4eb88daeaf
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: button_1
+  condition: []
+  action:
+  - type: turn_on
+    device_id: dd62ddc5b747cdaf29a815419cb989f4
+    entity_id: 2e486700a34beb8e888e44c0b89665ba
+    domain: light
+    brightness_pct: 20
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.bedside_lamp_toggle
   mode: single
