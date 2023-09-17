@@ -16,8 +16,8 @@
   condition: []
   action:
   - type: turn_off
-    device_id: 17934490a668e65a95553640b6008c91
-    entity_id: 43d1d1a68fd918946da31e901540b4f6
+    device_id: 64242088b9e7b9105fe5788a2bab2b28
+    entity_id: c39b0df8f67ec139b848f0a1f76c6139
     domain: switch
   - service: notify.mobile_app_jon_iphone
     data:
@@ -127,8 +127,8 @@
     entity_id: 2e486700a34beb8e888e44c0b89665ba
     domain: light
   - type: turn_on
-    device_id: 17934490a668e65a95553640b6008c91
-    entity_id: 43d1d1a68fd918946da31e901540b4f6
+    device_id: 64242088b9e7b9105fe5788a2bab2b28
+    entity_id: c39b0df8f67ec139b848f0a1f76c6139
     domain: switch
   mode: single
 - id: '1691961908252'
@@ -354,7 +354,7 @@
   - type: battery_level
     platform: device
     device_id: 39fbc6fe1a86add10fd919a29b74ad03
-    entity_id: f6089c7b80e6f5f5c872af81c0063d24
+    entity_id: a3cb7849c392275b39be4c3ef88c3eb8
     domain: sensor
     above: 99
   condition: []
@@ -500,4 +500,54 @@
     data: {}
     target:
       entity_id: input_boolean.bedside_lamp_toggle
+  mode: single
+- id: '1694861106361'
+  alias: Reset TV - NFC
+  description: Reset the Samsung TV which often starts misbehaving
+  trigger:
+  - platform: tag
+    tag_id: 3c2dde61-d82c-4d02-b20d-288dd2856421
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 17934490a668e65a95553640b6008c91
+    entity_id: ff74d0d07361441a4d21956b5f3cc783
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - type: turn_on
+    device_id: 17934490a668e65a95553640b6008c91
+    entity_id: ff74d0d07361441a4d21956b5f3cc783
+    domain: switch
+  mode: single
+- id: '1694863586950'
+  alias: Reset the Router
+  description: For when the internet feels sluggish
+  trigger: []
+  condition: []
+  action:
+  - service: notify.mobile_app_jon_iphone
+    data:
+      message: Resetting the internet
+      title: The Internet
+  - service: notify.mobile_app_sm_g973f
+    data:
+      message: Resetting the internet
+      title: The Internet
+  - type: turn_off
+    device_id: 17934490a668e65a95553640b6008c91
+    entity_id: d9f157a62bd8bad4f064391852acd18c
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - type: turn_on
+    device_id: 17934490a668e65a95553640b6008c91
+    entity_id: d9f157a62bd8bad4f064391852acd18c
+    domain: switch
   mode: single
