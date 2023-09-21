@@ -37,6 +37,10 @@
     entity_id: 2e486700a34beb8e888e44c0b89665ba
     domain: light
     brightness_pct: 20
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.bedside_lamp_toggle
   mode: single
 - id: '1691957631259'
   alias: Run bathroom fan (NFC)
@@ -106,8 +110,8 @@
     entity_id: 2c6e19e149f391173709c66c3ea2edd4
     domain: light
   - type: turn_on
-    device_id: 384de0aef30160c4cd7c0a16a2bacc6e
-    entity_id: 4906acf6edf4c08abb9bff70c1ca61f4
+    device_id: 7a77d0feeed093133858833de346247f
+    entity_id: be5cff5bca73a427a6cdc2dea999641a
     domain: switch
   mode: single
 - id: '1691961708012'
@@ -170,8 +174,8 @@
   condition: []
   action:
   - type: toggle
-    device_id: 384de0aef30160c4cd7c0a16a2bacc6e
-    entity_id: 4906acf6edf4c08abb9bff70c1ca61f4
+    device_id: 7a77d0feeed093133858833de346247f
+    entity_id: be5cff5bca73a427a6cdc2dea999641a
     domain: switch
   mode: single
 - id: '1692387270822'
@@ -347,23 +351,6 @@
     target:
       entity_id: alarm_control_panel.alarmo
   mode: single
-- id: '1694375599058'
-  alias: Jon-iPhone finished charging
-  description: ''
-  trigger:
-  - type: battery_level
-    platform: device
-    device_id: 39fbc6fe1a86add10fd919a29b74ad03
-    entity_id: a3cb7849c392275b39be4c3ef88c3eb8
-    domain: sensor
-    above: 99
-  condition: []
-  action:
-  - service: notify.mobile_app_jon_iphone
-    data:
-      message: iPhone finished charging!
-      title: Jon-iPhone charger
-  mode: single
 - id: '1694693354677'
   alias: Hall lights (switches)
   description: Switches for Hall lights
@@ -458,7 +445,7 @@
     domain: light
   mode: single
 - id: '1694817540849'
-  alias: Bedside lamp OFF
+  alias: Bedside lamp OFF (switch)
   description: ''
   trigger:
   - device_id: d0572f7c033a5d76c64c1a4eb88daeaf
@@ -550,4 +537,49 @@
     device_id: 17934490a668e65a95553640b6008c91
     entity_id: d9f157a62bd8bad4f064391852acd18c
     domain: switch
+  mode: single
+- id: '1695096160681'
+  alias: Bedside lamp ON sets input ON
+  description: For when the lamp is turned on physically
+  trigger:
+  - platform: device
+    type: turned_on
+    device_id: dd62ddc5b747cdaf29a815419cb989f4
+    entity_id: 2e486700a34beb8e888e44c0b89665ba
+    domain: light
+  condition: []
+  action:
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.bedside_lamp_toggle
+  mode: single
+- id: '1695096240488'
+  alias: Bedside lamp OFF sets input OFF
+  description: For when the lamp is turned on physically
+  trigger:
+  - platform: device
+    type: turned_off
+    device_id: dd62ddc5b747cdaf29a815419cb989f4
+    entity_id: 2e486700a34beb8e888e44c0b89665ba
+    domain: light
+  condition: []
+  action:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.bedside_lamp_toggle
+  mode: single
+- id: '1695165236137'
+  alias: Ready to sleep
+  description: ''
+  trigger: []
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 64242088b9e7b9105fe5788a2bab2b28
+    entity_id: c39b0df8f67ec139b848f0a1f76c6139
+    domain: switch
+  - service: light.turn_off
+    entity_id: all
   mode: single
