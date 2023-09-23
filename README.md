@@ -15,10 +15,14 @@ You can check my current HA version [here](.HA_VERSION). If you like anything he
     * [Tesla Smart sensor Siren](https://www.teslasmart.com/tesla-smart-sensor-siren)
   * Networking
     * [Pi-Hole](https://pi-hole.net/) with [Sensor](https://home-assistant.io/components/sensor.pi_hole/)
+  * Climate
+    * Xiaomi fans via the [Xiaomi Miio](https://www.home-assistant.io/integrations/xiaomi_miio/) integration
+    * Xiaomi Mi Smart Space Heater S via the [Xiaomi Miio](https://www.alza.cz/EN/xiaomi-mi-smart-space-heater-s-d6165460.htm) integration
   * Lights, Switches and Plugs
     * [Tesla Smart switches](https://www.teslasmart.com/tesla-smart-switch-zigbee)
     * [MOES Zigbee switches](https://www.aliexpress.com/item/1005005178438396.html?spm=a2g0o.order_list.order_list_main.5.c00b1802nC96cB) (battery powered)
     * [Zigbee LED strips](https://www.aliexpress.com/item/1005005073299542.html?spm=a2g0o.order_list.order_list_main.45.c00b1802nC96cB)
+    * [Mi Bedside Lamp](https://www.alza.cz/EN/hobby/xiaomi-mi-bedside-lamp-2-d5667641.htm)
     * [SIXWGH Zigbee smart plugs](https://www.aliexpress.com/item/1005005961001716.html?spm=a2g0o.order_list.order_list_main.40.c00b1802nC96cB)
     * [Silvercrest Zigbee plug](https://www.lidl.cz/p/silvercrest-zigbee-3-0-smart-home-inteligentni-zasuvka/p100346132)
     * [Silvercrest Zigbee socket strip](https://www.lidl.cz/p/silvercrest-zigbee-3-0-smart-home-zasuvkova-lista/p100353585)
@@ -27,7 +31,11 @@ You can check my current HA version [here](.HA_VERSION). If you like anything he
   * Notifications:
     * [iOS ](https://home-assistant.io/docs/ecosystem/ios/notifications/basic/) for basic notifications
     * [Alexa media player](https://github.com/custom-components/alexa_media_player) for integration with Echo Dots
+  * Voice Assistants
+    * Alexa integration
+    * Siri integration via HomeKit Bridge
   * Others
+    * Roborock S6 vacuum cleaner
     * [NFC tags](https://www.amazon.de/gp/product/B0BVFM8YVD/ref=ppx_yo_dt_b_asin_image_o04_s00?ie=UTF8&psc=1)
 
 <img src="./zigbee_network.png" alt="My Zigbee Network" />
