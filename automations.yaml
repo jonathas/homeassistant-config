@@ -406,7 +406,7 @@
       entity_id: c4679ea464275c334d51c92466416432
       domain: light
     - condition: time
-      after: '21:00:00'
+      after: '20:00:00'
       before: 08:00:00
       weekday:
       - mon
@@ -422,6 +422,10 @@
     entity_id: b56e5b0ccfb74b74713884bc168f0747
     domain: light
     brightness_pct: 100
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.bathroom_led_strip_boolean_input
   mode: single
 - id: '1694724531249'
   alias: Bathroom LED strip OFF (Motion)
@@ -432,17 +436,31 @@
     device_id: 4ae8515c94d49b4afaa2d04cbb5b4b94
     entity_id: 7cc73f086e231599008fb141b46c9e93
     domain: binary_sensor
-  condition: []
+  condition:
+  - condition: state
+    entity_id: input_boolean.bathroom_led_strip_boolean_input
+    state: 'on'
   action:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.bathroom_led_strip_boolean_input
   - delay:
       hours: 0
       minutes: 2
       seconds: 0
       milliseconds: 0
-  - type: turn_off
-    device_id: 650cda6559668b39b1a3bd9828de9d3e
-    entity_id: b56e5b0ccfb74b74713884bc168f0747
-    domain: light
+  - if:
+    - condition: state
+      entity_id: input_boolean.bathroom_led_strip_boolean_input
+      state: 'off'
+    then:
+    - type: turn_off
+      device_id: 650cda6559668b39b1a3bd9828de9d3e
+      entity_id: b56e5b0ccfb74b74713884bc168f0747
+      domain: light
+    alias: If boolean input still off (No "ON" automation has been called after the
+      timer)
   mode: single
 - id: '1694817540849'
   alias: Bedside lamp OFF (switch)
