@@ -106,9 +106,9 @@
   condition: []
   action:
   - type: turn_on
-    device_id: d2b26d2cbdce70789cae28fbe7fade34
-    entity_id: 2c6e19e149f391173709c66c3ea2edd4
-    domain: light
+    device_id: 27a6898e8c28c0ed2da7ca3cf2828467
+    entity_id: 22fdde003d535304af87fcafd5f75bb2
+    domain: switch
   - type: turn_on
     device_id: 7a77d0feeed093133858833de346247f
     entity_id: be5cff5bca73a427a6cdc2dea999641a
@@ -145,6 +145,14 @@
   action:
   - service: light.turn_off
     entity_id: all
+  - type: turn_off
+    device_id: 27a6898e8c28c0ed2da7ca3cf2828467
+    entity_id: 22fdde003d535304af87fcafd5f75bb2
+    domain: switch
+  - type: turn_off
+    device_id: 7a77d0feeed093133858833de346247f
+    entity_id: be5cff5bca73a427a6cdc2dea999641a
+    domain: switch
   mode: single
 - id: '1692386498657'
   alias: Jon's desk light switch
@@ -158,9 +166,9 @@
   condition: []
   action:
   - type: toggle
-    device_id: d2b26d2cbdce70789cae28fbe7fade34
-    entity_id: 2c6e19e149f391173709c66c3ea2edd4
-    domain: light
+    device_id: 27a6898e8c28c0ed2da7ca3cf2828467
+    entity_id: 22fdde003d535304af87fcafd5f75bb2
+    domain: switch
   mode: single
 - id: '1692386610340'
   alias: Estela's desk light switch
