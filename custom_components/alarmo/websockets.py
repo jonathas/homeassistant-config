@@ -14,21 +14,12 @@ from homeassistant.const import (
     ATTR_SERVICE,
     CONF_SERVICE_DATA,
     ATTR_STATE,
-    STATE_ALARM_ARMED_AWAY,
-    STATE_ALARM_ARMED_HOME,
-    STATE_ALARM_ARMED_NIGHT,
-    STATE_ALARM_ARMED_CUSTOM_BYPASS,
-    STATE_ALARM_ARMED_VACATION,
-    STATE_ALARM_DISARMED,
-    STATE_ALARM_TRIGGERED,
-    STATE_ALARM_PENDING,
-    STATE_ALARM_DISARMING,
-    STATE_ALARM_ARMING,
 )
 
 from homeassistant.components.alarm_control_panel import (
     CodeFormat,
     ATTR_CODE_ARM_REQUIRED,
+    AlarmControlPanelState
 )
 from homeassistant.components.websocket_api import (decorators, async_register_command)
 
@@ -65,6 +56,7 @@ from .sensors import (
     ATTR_TIMEOUT,
     ATTR_EVENT_COUNT,
     ATTR_ENTITIES,
+    ATTR_NEW_ENTITY_ID,
     SENSOR_TYPES,
 )
 
@@ -105,6 +97,7 @@ class AlarmoConfigView(HomeAssistantView):
             {
                 vol.Optional(ATTR_CODE_ARM_REQUIRED): cv.boolean,
                 vol.Optional(const.ATTR_CODE_DISARM_REQUIRED): cv.boolean,
+                vol.Optional(const.ATTR_CODE_MODE_CHANGE_REQUIRED): cv.boolean,
                 vol.Optional(ATTR_CODE_FORMAT): vol.In(
                     [CodeFormat.NUMBER, CodeFormat.TEXT]
                 ),
@@ -114,16 +107,16 @@ class AlarmoConfigView(HomeAssistantView):
                     vol.Required(const.ATTR_ENABLED): cv.boolean,
                     vol.Required(CONF_STATE_TOPIC): cv.string,
                     vol.Optional(const.ATTR_STATE_PAYLOAD): vol.Schema({
-                        vol.Optional(STATE_ALARM_DISARMED): cv.string,
-                        vol.Optional(STATE_ALARM_ARMED_HOME): cv.string,
-                        vol.Optional(STATE_ALARM_ARMED_AWAY): cv.string,
-                        vol.Optional(STATE_ALARM_ARMED_NIGHT): cv.string,
-                        vol.Optional(STATE_ALARM_ARMED_CUSTOM_BYPASS): cv.string,
-                        vol.Optional(STATE_ALARM_ARMED_VACATION): cv.string,
-                        vol.Optional(STATE_ALARM_PENDING): cv.string,
-                        vol.Optional(STATE_ALARM_ARMING): cv.string,
-                        vol.Optional(STATE_ALARM_DISARMING): cv.string,
-                        vol.Optional(STATE_ALARM_TRIGGERED): cv.string
+                        vol.Optional(const.CONF_ALARM_DISARMED): cv.string,
+                        vol.Optional(const.CONF_ALARM_ARMED_HOME): cv.string,
+                        vol.Optional(const.CONF_ALARM_ARMED_AWAY): cv.string,
+                        vol.Optional(const.CONF_ALARM_ARMED_NIGHT): cv.string,
+                        vol.Optional(const.CONF_ALARM_ARMED_CUSTOM_BYPASS): cv.string,
+                        vol.Optional(const.CONF_ALARM_ARMED_VACATION): cv.string,
+                        vol.Optional(const.CONF_ALARM_PENDING): cv.string,
+                        vol.Optional(const.CONF_ALARM_ARMING): cv.string,
+                        #vol.Optional(const.CONF_ALARM_DISARMING): cv.string,
+                        vol.Optional(const.CONF_ALARM_TRIGGERED): cv.string
                     }),
                     vol.Required(CONF_COMMAND_TOPIC): cv.string,
                     vol.Optional(const.ATTR_COMMAND_PAYLOAD): vol.Schema({
@@ -173,11 +166,11 @@ class AlarmoAreaView(HomeAssistantView):
                 vol.Optional(ATTR_NAME): cv.string,
                 vol.Optional(const.ATTR_REMOVE): cv.boolean,
                 vol.Optional(const.ATTR_MODES): vol.Schema({
-                    vol.Optional(STATE_ALARM_ARMED_AWAY): mode_schema,
-                    vol.Optional(STATE_ALARM_ARMED_HOME): mode_schema,
-                    vol.Optional(STATE_ALARM_ARMED_NIGHT): mode_schema,
-                    vol.Optional(STATE_ALARM_ARMED_CUSTOM_BYPASS): mode_schema,
-                    vol.Optional(STATE_ALARM_ARMED_VACATION): mode_schema
+                    vol.Optional(const.CONF_ALARM_ARMED_AWAY): mode_schema,
+                    vol.Optional(const.CONF_ALARM_ARMED_HOME): mode_schema,
+                    vol.Optional(const.CONF_ALARM_ARMED_NIGHT): mode_schema,
+                    vol.Optional(const.CONF_ALARM_ARMED_CUSTOM_BYPASS): mode_schema,
+                    vol.Optional(const.CONF_ALARM_ARMED_VACATION): mode_schema
                 })
             }
         )
@@ -228,7 +221,8 @@ class AlarmoSensorView(HomeAssistantView):
                 vol.Optional(ATTR_GROUP): vol.Any(
                     cv.string,
                     None
-                )
+                ),
+                vol.Optional(ATTR_NEW_ENTITY_ID): cv.string
             }
         )
     )
@@ -464,6 +458,20 @@ def websocket_get_countdown(hass, connection, msg):
     connection.send_result(msg["id"], data)
 
 
+@callback
+def websocket_get_ready_to_arm_modes(hass, connection, msg):
+    """Publish ready_to_arm_modes for alarm entity."""
+    entity_id = msg["entity_id"]
+    item = next((entity for entity in hass.data[const.DOMAIN]["areas"].values() if entity.entity_id == entity_id), None)
+    if hass.data[const.DOMAIN]["master"] and not item and hass.data[const.DOMAIN]["master"].entity_id == entity_id:
+        item = hass.data[const.DOMAIN]["master"]
+
+    data = {
+        "modes": item._ready_to_arm_modes if item else None
+    }
+    connection.send_result(msg["id"], data)
+
+
 async def async_register_websockets(hass):
 
     hass.http.register_view(AlarmoConfigView)
@@ -545,3 +553,15 @@ async def async_register_websockets(hass):
             }
         ),
     )
+    async_register_command(
+        hass,
+        "alarmo/ready_to_arm_modes",
+        websocket_get_ready_to_arm_modes,
+        websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
+            {
+                vol.Required("type"): "alarmo/ready_to_arm_modes",
+                vol.Required("entity_id"): cv.entity_id
+            }
+        ),
+    )
+

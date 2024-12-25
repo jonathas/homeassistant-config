@@ -9,18 +9,26 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
-sensor:
-  - platform: worldclock
-    name: Prague
-    time_zone: Europe/Prague
-  - platform: worldclock
-    name: Rio
-    time_zone: America/Sao_Paulo
+#sensor:
+#  - platform: worldclock
+#    name: Prague
+#    time_zone: Europe/Prague
+#  - platform: worldclock
+#    name: Rio
+#    time_zone: America/Sao_Paulo
 
-climate:
-  - platform: miheater
-    host: 192.168.0.52
-    token: !secret miheater_token
-    name: xiaomi_heater
-    model: zhimi.heater.mc2
+#climate:
+#  - platform: miheater
+#    host: 192.168.0.52
+#   token: !secret miheater_token
+#    name: xiaomi_heater
+#    model: zhimi.heater.mc2
 
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 192.168.0.68
+
+duckdns:
+  domain: !secret duckdns_domain
+  access_token: !secret duckdns_access_token

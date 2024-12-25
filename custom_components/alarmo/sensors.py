@@ -9,7 +9,7 @@ from homeassistant.core import (
 )
 
 from homeassistant.helpers.event import (
-    async_track_state_change,
+    async_track_state_change_event,
     async_track_point_in_time,
 )
 
@@ -25,15 +25,14 @@ from homeassistant.const import (
     STATE_CLOSED,
     STATE_ON,
     STATE_OFF,
-    STATE_LOCKED,
-    STATE_UNLOCKED,
-    STATE_ALARM_PENDING,
-    STATE_ALARM_ARMING,
-    STATE_ALARM_TRIGGERED,
     ATTR_STATE,
     ATTR_LAST_TRIP_TIME,
     ATTR_NAME,
 )
+
+from homeassistant.components.alarm_control_panel import AlarmControlPanelState
+
+from homeassistant.components.lock import LockState
 
 from . import const
 
@@ -50,9 +49,10 @@ ATTR_GROUP_ID = "group_id"
 ATTR_TIMEOUT = "timeout"
 ATTR_EVENT_COUNT = "event_count"
 ATTR_ENTITIES = "entities"
+ATTR_NEW_ENTITY_ID = "new_entity_id"
 
-SENSOR_STATES_OPEN = [STATE_ON, STATE_OPEN, STATE_UNLOCKED]
-SENSOR_STATES_CLOSED = [STATE_OFF, STATE_CLOSED, STATE_LOCKED]
+SENSOR_STATES_OPEN = [STATE_ON, STATE_OPEN, LockState.UNLOCKED]
+SENSOR_STATES_CLOSED = [STATE_OFF, STATE_CLOSED, LockState.LOCKED]
 
 
 SENSOR_TYPE_DOOR = "door"
@@ -93,7 +93,7 @@ def sensor_state_allowed(state, sensor_config, alarm_state):
         # sensor has the safe state
         return True
 
-    elif alarm_state == STATE_ALARM_TRIGGERED:
+    elif alarm_state == AlarmControlPanelState.TRIGGERED:
         # alarm is already triggered
         return True
 
@@ -101,7 +101,7 @@ def sensor_state_allowed(state, sensor_config, alarm_state):
         # alarm should always be triggered by always-on sensor
         return False
 
-    elif alarm_state == STATE_ALARM_ARMING and not sensor_config[ATTR_USE_EXIT_DELAY]:
+    elif alarm_state == AlarmControlPanelState.ARMING and not sensor_config[ATTR_USE_EXIT_DELAY]:
         # arming should be aborted if sensor without exit delay is active
         return False
 
@@ -109,7 +109,7 @@ def sensor_state_allowed(state, sensor_config, alarm_state):
         # normal triggering case
         return False
 
-    elif alarm_state == STATE_ALARM_PENDING and not sensor_config[ATTR_USE_ENTRY_DELAY]:
+    elif alarm_state == AlarmControlPanelState.PENDING and not sensor_config[ATTR_USE_ENTRY_DELAY]:
         # triggering of immediate sensor while alarm is pending
         return False
 
@@ -128,6 +128,7 @@ class SensorHandler:
         self._group_events = {}
         self._startup_complete = False
 
+        @callback
         def async_update_sensor_config():
             """sensor config updated, reload the configuration."""
             self._config = self.hass.data[const.DOMAIN]["coordinator"].store.async_get_sensors()
@@ -161,6 +162,7 @@ class SensorHandler:
 
     def async_watch_sensor_states(self, area_id: str = None, old_state: str = None, state: str = None):
         """watch sensors based on the state of the alarm entities."""
+
         sensors_list = []
         for area in self.hass.data[const.DOMAIN]["areas"].keys():
             sensors_list.extend(self.active_sensors_for_alarm_state(area))
@@ -169,7 +171,7 @@ class SensorHandler:
             self._state_listener()
 
         if len(sensors_list):
-            self._state_listener = async_track_state_change(
+            self._state_listener = async_track_state_change_event(
                 self.hass, sensors_list, self.async_sensor_state_changed
             )
         else:
@@ -191,11 +193,16 @@ class SensorHandler:
                 if state and state.state and sensor_state != STATE_UNKNOWN:
                     _LOGGER.debug("Initial state for {} is {}".format(entity, parse_sensor_state(state)))
 
-    def active_sensors_for_alarm_state(self, area_id: str, state: str = None):
+        if area_id:
+            self.update_ready_to_arm_status(area_id)
+
+    def active_sensors_for_alarm_state(self, area_id: str, to_state: str = None):
         """Compose a list of sensors that are active for the state"""
         alarm_entity = self.hass.data[const.DOMAIN]["areas"][area_id]
 
-        if not state:
+        if to_state:
+            state = to_state
+        else:
             state = alarm_entity.arm_mode if alarm_entity.arm_mode else alarm_entity.state
 
         entities = []
@@ -209,6 +216,10 @@ class SensorHandler:
                 or config[ATTR_ALWAYS_ON]
             ):
                 entities.append(entity)
+            elif not to_state and config["type"] != SENSOR_TYPE_MOTION:
+                # always watch all sensors other than motion sensors, to indicate readiness for arming
+                entities.append(entity)
+
         return entities
 
     def validate_arming_event(self, area_id: str, target_state: str = None, **kwargs):
@@ -223,9 +234,9 @@ class SensorHandler:
 
         alarm_state = target_state
         if use_delay and alarm_state in const.ARM_MODES:
-            alarm_state = STATE_ALARM_ARMING
-        elif use_delay and alarm_state == STATE_ALARM_TRIGGERED:
-            alarm_state = STATE_ALARM_PENDING
+            alarm_state = AlarmControlPanelState.ARMING
+        elif use_delay and alarm_state == AlarmControlPanelState.TRIGGERED:
+            alarm_state = AlarmControlPanelState.PENDING
 
         for entity in sensors_list:
             sensor_config = self._config[entity]
@@ -254,14 +265,17 @@ class SensorHandler:
         return (open_sensors, bypassed_sensors)
 
     @callback
-    async def async_sensor_state_changed(self, entity, old_state, new_state):
+    def async_sensor_state_changed(self, event):
         """Callback fired when a sensor state has changed."""
 
-        old_state = parse_sensor_state(old_state)
-        new_state = parse_sensor_state(new_state)
+        entity = event.data["entity_id"]
+        old_state = parse_sensor_state(event.data["old_state"])
+        new_state = parse_sensor_state(event.data["new_state"])
+        sensor_config = self._config[entity]
         if old_state == STATE_UNKNOWN:
             # sensor is unknown at startup, state which comes after is considered as initial state
             _LOGGER.debug("Initial state for {} is {}".format(entity, new_state))
+            self.update_ready_to_arm_status(sensor_config["area"])
             return
         if old_state == new_state:
             # not a state change - ignore
@@ -269,13 +283,21 @@ class SensorHandler:
 
         _LOGGER.debug("entity {} changed: old_state={}, new_state={}".format(entity, old_state, new_state))
 
-        sensor_config = self._config[entity]
         alarm_entity = self.hass.data[const.DOMAIN]["areas"][sensor_config["area"]]
         alarm_state = alarm_entity.state
 
+        if (
+            alarm_entity.arm_mode and
+            alarm_entity.arm_mode not in sensor_config[const.ATTR_MODES] and
+            not sensor_config[ATTR_ALWAYS_ON]
+        ):
+            # sensor is not active in this arm mode, ignore
+            self.update_ready_to_arm_status(sensor_config["area"])
+            return
+
         res = sensor_state_allowed(new_state, sensor_config, alarm_state)
 
-        if sensor_config[ATTR_ARM_ON_CLOSE] and alarm_state == STATE_ALARM_ARMING:
+        if sensor_config[ATTR_ARM_ON_CLOSE] and alarm_state == AlarmControlPanelState.ARMING:
             # we are arming and sensor is configured to arm on closing
             if new_state == STATE_CLOSED:
                 self.start_arm_timer(entity)
@@ -284,52 +306,56 @@ class SensorHandler:
 
         if res:
             # nothing to do here, sensor state is OK
+            self.update_ready_to_arm_status(sensor_config["area"])
             return
 
         open_sensors = self.process_group_event(entity, new_state)
         if not open_sensors:
             # triggered sensor is part of a group and should be ignored
+            self.update_ready_to_arm_status(sensor_config["area"])
             return
 
         if sensor_config[ATTR_ALWAYS_ON]:
             # immediate trigger due to always on sensor
             _LOGGER.info("Alarm is triggered due to an always-on sensor: {}".format(entity))
-            await alarm_entity.async_trigger(
+            alarm_entity.async_trigger(
                 skip_delay=True,
                 open_sensors=open_sensors
             )
 
-        elif alarm_state == STATE_ALARM_ARMING:
+        elif alarm_state == AlarmControlPanelState.ARMING:
             # sensor triggered while arming, abort arming
             _LOGGER.debug("Arming was aborted due to a sensor being active: {}".format(entity))
-            await alarm_entity.async_arm_failure(open_sensors)
+            alarm_entity.async_arm_failure(open_sensors)
 
         elif alarm_state in const.ARM_MODES:
             # standard alarm trigger
             _LOGGER.info("Alarm is triggered due to sensor: {}".format(entity))
-            await alarm_entity.async_trigger(
+            alarm_entity.async_trigger(
                 skip_delay=(not sensor_config[ATTR_USE_ENTRY_DELAY]),
                 open_sensors=open_sensors
             )
 
-        elif alarm_state == STATE_ALARM_PENDING:
+        elif alarm_state == AlarmControlPanelState.PENDING:
             # immediate trigger while in pending state
             _LOGGER.info("Alarm is triggered due to sensor: {}".format(entity))
-            await alarm_entity.async_trigger(
+            alarm_entity.async_trigger(
                 skip_delay=True,
                 open_sensors=open_sensors
             )
+
+        self.update_ready_to_arm_status(sensor_config["area"])
 
     def start_arm_timer(self, entity):
         """start timer for automatical arming"""
 
         @callback
-        async def timer_finished(now):
+        def timer_finished(now):
             _LOGGER.debug("timer finished")
             sensor_config = self._config[entity]
             alarm_entity = self.hass.data[const.DOMAIN]["areas"][sensor_config["area"]]
-            if alarm_entity.state == STATE_ALARM_ARMING:
-                await alarm_entity.async_arm(alarm_entity.arm_mode, skip_delay=True)
+            if alarm_entity.state == AlarmControlPanelState.ARMING:
+                alarm_entity.async_arm(alarm_entity.arm_mode, skip_delay=True)
         now = dt_util.utcnow()
 
         if entity in self._arm_timers:
@@ -383,3 +409,27 @@ class SensorHandler:
                 open_sensors[entity] = group_events[entity][ATTR_STATE]
             _LOGGER.debug("tripped sensor {} caused the triggering of group {}".format(entity, group[ATTR_NAME]))
             return open_sensors
+
+    def update_ready_to_arm_status(self, area_id):
+        """calculate whether the system is ready for arming (based on the sensor states)."""
+        alarm_entity = self.hass.data[const.DOMAIN]["areas"][area_id]
+
+        arm_modes = [
+            mode
+            for (mode, config) in alarm_entity._config[const.ATTR_MODES].items()
+            if config[const.ATTR_ENABLED]
+        ]
+
+        if alarm_entity.state in const.ARM_MODES or alarm_entity.state == AlarmControlPanelState.ARMING and alarm_entity.arm_mode:
+            arm_modes.remove(alarm_entity.arm_mode)
+
+        def arm_mode_is_ready(mode):
+            (blocking_sensors, _bypassed_sensors) = self.validate_arming_event(area_id, mode)
+            result = not(len(blocking_sensors))
+            return result
+
+        arm_modes = list(filter(arm_mode_is_ready, arm_modes))
+        prev_arm_modes = alarm_entity._ready_to_arm_modes
+
+        if arm_modes != prev_arm_modes:
+            alarm_entity.update_ready_to_arm_modes(arm_modes)

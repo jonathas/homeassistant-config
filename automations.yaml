@@ -8,21 +8,25 @@
         device_id: 874292888d49081c268ee8e27b9c2605
       motion_entity: binary_sensor.front_door_motion_sensor_motion
 - id: '1691847438428'
-  alias: Turn sleep machine off (Daily schedule)
+  alias: Turn sleep machines off (Daily schedule)
   description: ''
-  trigger:
-  - platform: time
-    at: '10:10:00'
-  condition: []
-  action:
+  triggers:
+  - at: '10:10:00'
+    trigger: time
+  conditions: []
+  actions:
   - type: turn_off
-    device_id: 64242088b9e7b9105fe5788a2bab2b28
-    entity_id: c39b0df8f67ec139b848f0a1f76c6139
+    device_id: 029f6368dd8596d462f1f686841d99a3
+    entity_id: b554a8e128a23d0afaa11f767f13b54a
     domain: switch
-  - service: notify.mobile_app_jon_iphone
-    data:
+  - type: turn_off
+    device_id: 029f6368dd8596d462f1f686841d99a3
+    entity_id: ab2a5cf760d717c374b499a2e4363cc5
+    domain: switch
+  - data:
       message: Sleep machine off
       title: Automation
+    action: notify.mobile_app_jon_iphone
   mode: single
 - id: '1691848308714'
   alias: Amaya is up (NFC)
@@ -44,7 +48,7 @@
   mode: single
 - id: '1691957631259'
   alias: Run bathroom fan (NFC)
-  description: For 5 minutes
+  description: For 30 minutes
   trigger:
   - platform: tag
     tag_id: 61d92c29-9aa4-46e6-acff-eae3a0eec044
@@ -56,45 +60,12 @@
     domain: light
   - delay:
       hours: 0
-      minutes: 5
+      minutes: 30
       seconds: 0
       milliseconds: 0
   - type: turn_off
     device_id: 53b0f001e380e99402db43c79099a703
     entity_id: 0e50149fed819e0d0cd7d540173f3ada
-    domain: light
-  mode: single
-- id: '1691960330122'
-  alias: Movie Night (NFC)
-  description: ''
-  trigger:
-  - platform: tag
-    tag_id: 4a235380-62f0-4024-8405-2a3937920ae2
-  condition: []
-  action:
-  - type: turn_on
-    device_id: 0d0dd790e6a8e73a56a5e35c841d9cec
-    entity_id: 649c7ae0063c4fda1b15913be3170e2f
-    domain: switch
-  - type: turn_on
-    device_id: 7de44226570dfab57e466bc22c4dc3f8
-    entity_id: fa70a94ea559a0c67eb11bb45d1c0496
-    domain: remote
-  - service: media_player.turn_on
-    data: {}
-    target:
-      device_id: 7de44226570dfab57e466bc22c4dc3f8
-  - type: turn_off
-    device_id: 0149505f3839e969313b3fdcc322bde0
-    entity_id: 6cc5dbb9a3056a17f400b64c7162dd67
-    domain: light
-  - type: turn_off
-    device_id: f9586f90a966023e326b2c40268d4c29
-    entity_id: c775fd444d108ed2e8c6aab77313a4f1
-    domain: light
-  - type: turn_on
-    device_id: 17162c8a1b34b80ab8c6a06bdc90969c
-    entity_id: 5888154a072713f62c48b0e400d291ca
     domain: light
   mode: single
 - id: '1691961487180'
@@ -117,11 +88,11 @@
 - id: '1691961708012'
   alias: Wind down (NFC)
   description: ''
-  trigger:
-  - platform: tag
-    tag_id: 7497d748-45c1-4be8-9b0f-e511dc166109
-  condition: []
-  action:
+  triggers:
+  - tag_id: 7497d748-45c1-4be8-9b0f-e511dc166109
+    trigger: tag
+  conditions: []
+  actions:
   - type: turn_off
     device_id: 8f3e53dcf02e7c97e18f16fb8aa48d1c
     entity_id: ec7c26ce9ce900ada90334bfcf92cd96
@@ -131,8 +102,8 @@
     entity_id: 2e486700a34beb8e888e44c0b89665ba
     domain: light
   - type: turn_on
-    device_id: 64242088b9e7b9105fe5788a2bab2b28
-    entity_id: c39b0df8f67ec139b848f0a1f76c6139
+    device_id: 029f6368dd8596d462f1f686841d99a3
+    entity_id: b554a8e128a23d0afaa11f767f13b54a
     domain: switch
   mode: single
 - id: '1691961908252'
@@ -294,21 +265,6 @@
           data:
             title: Low battery on sensors
             message: 'The following sensors are running out of battery: {{sensors}}'
-- id: '1693585840136'
-  alias: Update notifications
-  description: ''
-  use_blueprint:
-    path: mdegat01/update_notifications.yaml
-    input:
-      update_entities:
-      - update.home_assistant_core_update
-      - update.home_assistant_operating_system_update
-      - update.home_assistant_supervisor_update
-      - update.pi_hole_core_update_available
-      - update.pi_hole_ftl_update_available
-      - update.pi_hole_web_update_available
-      mobile_app_device: 39fbc6fe1a86add10fd919a29b74ad03
-      send_to_ha: true
 - id: '1693586144323'
   alias: Smoke alert
   description: ''
@@ -317,27 +273,27 @@
     input:
       sensor:
       - binary_sensor.smoke_sensor_hall_smoke
-      - binary_sensor.smart_siren_smoke
       - binary_sensor.smoke_sensor_office_smoke
       - binary_sensor.smoke_sensor_living_room_smoke
       text: ' has detected Smoke! Call 150 (Fire brigade)!'
 - id: '1693640955673'
   alias: Tablet battery notification
   description: ''
-  trigger:
+  triggers:
   - type: battery_level
-    platform: device
     device_id: a1bd579d0d06464d81c358e5a8e61325
     entity_id: ad3cd6cbac5b5afda9d9763b4229053a
     domain: sensor
     below: 20
-  condition: []
-  action:
-  - service: notify.mobile_app_jon_iphone
-    data:
+    trigger: device
+  conditions: []
+  actions:
+  - data:
       title: Tablet running out of battery
       message: Time to charge the tablet!
-  - service: notify.mobile_app_sm_g973f
+    action: notify.mobile_app_jon_iphone
+  - action: notify.mobile_app_iphone_de_estela
+    metadata: {}
     data:
       title: Tablet running out of battery
       message: Time to charge the tablet!
@@ -396,80 +352,6 @@
     entity_id: 5888154a072713f62c48b0e400d291ca
     domain: light
   mode: single
-- id: '1694724431165'
-  alias: Bathroom LED strip ON (Motion)
-  description: ''
-  trigger:
-  - type: motion
-    platform: device
-    device_id: 4ae8515c94d49b4afaa2d04cbb5b4b94
-    entity_id: 7cc73f086e231599008fb141b46c9e93
-    domain: binary_sensor
-  condition:
-  - condition: and
-    conditions:
-    - condition: device
-      type: is_off
-      device_id: 53b0f001e380e99402db43c79099a703
-      entity_id: c4679ea464275c334d51c92466416432
-      domain: light
-    - condition: time
-      after: '20:00:00'
-      before: 08:00:00
-      weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
-      - sat
-      - sun
-  action:
-  - type: turn_on
-    device_id: 650cda6559668b39b1a3bd9828de9d3e
-    entity_id: b56e5b0ccfb74b74713884bc168f0747
-    domain: light
-    brightness_pct: 100
-  - service: input_boolean.turn_on
-    data: {}
-    target:
-      entity_id: input_boolean.bathroom_led_strip_boolean_input
-  mode: single
-- id: '1694724531249'
-  alias: Bathroom LED strip OFF (Motion)
-  description: ''
-  trigger:
-  - type: no_motion
-    platform: device
-    device_id: 4ae8515c94d49b4afaa2d04cbb5b4b94
-    entity_id: 7cc73f086e231599008fb141b46c9e93
-    domain: binary_sensor
-  condition:
-  - condition: state
-    entity_id: input_boolean.bathroom_led_strip_boolean_input
-    state: 'on'
-  action:
-  - service: input_boolean.turn_off
-    data: {}
-    target:
-      entity_id: input_boolean.bathroom_led_strip_boolean_input
-  - delay:
-      hours: 0
-      minutes: 2
-      seconds: 0
-      milliseconds: 0
-  - if:
-    - condition: state
-      entity_id: input_boolean.bathroom_led_strip_boolean_input
-      state: 'off'
-    then:
-    - type: turn_off
-      device_id: 650cda6559668b39b1a3bd9828de9d3e
-      entity_id: b56e5b0ccfb74b74713884bc168f0747
-      domain: light
-    alias: If boolean input still off (No "ON" automation has been called after the
-      timer)
-  mode: single
 - id: '1694817540849'
   alias: Bedside lamp OFF (switch)
   description: ''
@@ -494,8 +376,8 @@
       entity_id: input_boolean.bedside_lamp_toggle
   mode: single
 - id: '1694817661674'
-  alias: Bedside lamp ON (20 brightness)
-  description: Double click for 20% brightness
+  alias: Bedside lamp ON (5 brightness)
+  description: Double click for 5% brightness
   trigger:
   - device_id: d0572f7c033a5d76c64c1a4eb88daeaf
     domain: zha
@@ -508,7 +390,7 @@
     device_id: dd62ddc5b747cdaf29a815419cb989f4
     entity_id: 2e486700a34beb8e888e44c0b89665ba
     domain: light
-    brightness_pct: 20
+    brightness_pct: 5
   - service: input_boolean.turn_on
     data: {}
     target:
@@ -517,52 +399,16 @@
 - id: '1694861106361'
   alias: Reset TV - NFC
   description: Reset the Samsung TV which often starts misbehaving
-  trigger:
-  - platform: tag
-    tag_id: 3c2dde61-d82c-4d02-b20d-288dd2856421
-  condition: []
-  action:
-  - type: turn_off
-    device_id: 17934490a668e65a95553640b6008c91
-    entity_id: ff74d0d07361441a4d21956b5f3cc783
-    domain: switch
+  triggers:
+  - tag_id: 3c2dde61-d82c-4d02-b20d-288dd2856421
+    trigger: tag
+  conditions: []
+  actions:
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - type: turn_on
-    device_id: 17934490a668e65a95553640b6008c91
-    entity_id: ff74d0d07361441a4d21956b5f3cc783
-    domain: switch
-  mode: single
-- id: '1694863586950'
-  alias: Reset the Router
-  description: For when the internet feels sluggish
-  trigger: []
-  condition: []
-  action:
-  - service: notify.mobile_app_jon_iphone
-    data:
-      message: Resetting the internet
-      title: The Internet
-  - service: notify.mobile_app_sm_g973f
-    data:
-      message: Resetting the internet
-      title: The Internet
-  - type: turn_off
-    device_id: 17934490a668e65a95553640b6008c91
-    entity_id: d9f157a62bd8bad4f064391852acd18c
-    domain: switch
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 5
-      milliseconds: 0
-  - type: turn_on
-    device_id: 17934490a668e65a95553640b6008c91
-    entity_id: d9f157a62bd8bad4f064391852acd18c
-    domain: switch
   mode: single
 - id: '1695096160681'
   alias: Bedside lamp ON sets input ON
@@ -599,13 +445,210 @@
 - id: '1695165236137'
   alias: Ready to sleep
   description: ''
-  trigger: []
-  condition: []
+  triggers: []
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: 029f6368dd8596d462f1f686841d99a3
+    entity_id: b554a8e128a23d0afaa11f767f13b54a
+    domain: switch
+  - type: turn_on
+    device_id: 029f6368dd8596d462f1f686841d99a3
+    entity_id: ab2a5cf760d717c374b499a2e4363cc5
+    domain: switch
+  - entity_id: all
+    action: light.turn_off
+  mode: single
+- id: '1713084722052'
+  alias: Bathroom fan on if door closed
+  description: ''
+  trigger:
+  - type: not_opened
+    platform: device
+    device_id: c59a2665845314328891a387d5aa23f1
+    entity_id: d208a439f4d1de5612d31b08fe70897d
+    domain: binary_sensor
+  condition:
+  - condition: device
+    type: is_on
+    device_id: 53b0f001e380e99402db43c79099a703
+    entity_id: c4679ea464275c334d51c92466416432
+    domain: light
   action:
   - type: turn_on
-    device_id: 64242088b9e7b9105fe5788a2bab2b28
-    entity_id: c39b0df8f67ec139b848f0a1f76c6139
+    device_id: 53b0f001e380e99402db43c79099a703
+    entity_id: 0e50149fed819e0d0cd7d540173f3ada
+    domain: light
+  mode: single
+- id: '1714767642612'
+  alias: Baby's bath
+  description: ''
+  triggers: []
+  conditions: []
+  actions:
+  - entity_id: all
+    enabled: false
+    action: light.turn_off
+  - type: turn_on
+    device_id: 029f6368dd8596d462f1f686841d99a3
+    entity_id: b554a8e128a23d0afaa11f767f13b54a
     domain: switch
-  - service: light.turn_off
-    entity_id: all
+  - type: turn_on
+    device_id: 029f6368dd8596d462f1f686841d99a3
+    entity_id: ab2a5cf760d717c374b499a2e4363cc5
+    domain: switch
+  - type: turn_on
+    device_id: dd62ddc5b747cdaf29a815419cb989f4
+    entity_id: 2e486700a34beb8e888e44c0b89665ba
+    domain: light
+    brightness_pct: 60
+  - type: turn_on
+    device_id: 8f3e53dcf02e7c97e18f16fb8aa48d1c
+    entity_id: ec7c26ce9ce900ada90334bfcf92cd96
+    domain: light
+    enabled: true
+  - type: turn_on
+    device_id: 53b0f001e380e99402db43c79099a703
+    entity_id: 0e50149fed819e0d0cd7d540173f3ada
+    domain: light
+  - type: turn_on
+    device_id: 53b0f001e380e99402db43c79099a703
+    entity_id: c4679ea464275c334d51c92466416432
+    domain: light
+  - type: turn_on
+    device_id: 17162c8a1b34b80ab8c6a06bdc90969c
+    entity_id: 5888154a072713f62c48b0e400d291ca
+    domain: light
+    brightness_pct: 100
+  mode: single
+- id: '1734094292918'
+  alias: Open shutters in the sunrise
+  description: Open shutters in the sunrise
+  triggers:
+  - trigger: sun
+    event: sunrise
+    offset: 0
+  conditions: []
+  actions:
+  - device_id: f98d06aeb44a5b9a6d822ba9a77a22c6
+    domain: cover
+    entity_id: 35aebba38e8128762776d3ee2bb4fddc
+    type: close
+  - device_id: 30f3bea3ba2eedf57fe252950b69a03f
+    domain: cover
+    entity_id: b7289e0524cd2ce2c8e54560a107fb11
+    type: close
+    enabled: false
+  mode: single
+- id: '1734094507472'
+  alias: Close shutters in the sunset
+  description: Close shutters in the sunset
+  triggers:
+  - trigger: sun
+    event: sunset
+    offset: 0
+  conditions: []
+  actions:
+  - device_id: f98d06aeb44a5b9a6d822ba9a77a22c6
+    domain: button
+    entity_id: e7010a7300c60274af32e55aa8f5e8b6
+    type: press
+  - device_id: 30f3bea3ba2eedf57fe252950b69a03f
+    domain: button
+    entity_id: 396bfc8c42f7722b3286779dcaaff062
+    type: press
+    enabled: false
+  mode: single
+- id: '1735154738113'
+  alias: Turn bedside lamp off when in bed
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.withings_in_bed
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  conditions:
+  - condition: time
+    after: '22:00:00'
+    before: 05:00:00
+    weekday:
+    - sun
+    - sat
+    - fri
+    - thu
+    - wed
+    - mon
+    - tue
+  actions:
+  - type: turn_off
+    device_id: dd62ddc5b747cdaf29a815419cb989f4
+    entity_id: 2e486700a34beb8e888e44c0b89665ba
+    domain: light
+  mode: single
+- id: '1735155380420'
+  alias: Turn lights on when preparing for the gym
+  description: Turn some of the lights on when leaving bed and preparing to go to
+    the gym in the morning
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.withings_in_bed
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  conditions:
+  - condition: time
+    after: 05:00:00
+    before: 07:00:00
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+  actions:
+  - type: turn_on
+    device_id: 7a77d0feeed093133858833de346247f
+    entity_id: be5cff5bca73a427a6cdc2dea999641a
+    domain: switch
+  - type: turn_on
+    device_id: 17162c8a1b34b80ab8c6a06bdc90969c
+    entity_id: 5888154a072713f62c48b0e400d291ca
+    domain: light
+  mode: single
+- id: '1735158621340'
+  alias: Open Office shutter when office window opens
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.office_window_1_opening
+    to: 'on'
+  conditions: []
+  actions:
+  - device_id: f98d06aeb44a5b9a6d822ba9a77a22c6
+    domain: cover
+    entity_id: 35aebba38e8128762776d3ee2bb4fddc
+    type: close
+  mode: single
+- id: '1735158803140'
+  alias: Open Children's bedroom shutter when window opens
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.lumi_lumi_sensor_magnet_aq2_opening_9
+    to: 'on'
+  conditions: []
+  actions:
+  - device_id: 30f3bea3ba2eedf57fe252950b69a03f
+    domain: cover
+    entity_id: b7289e0524cd2ce2c8e54560a107fb11
+    type: close
   mode: single

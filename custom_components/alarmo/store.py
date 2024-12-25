@@ -3,23 +3,12 @@ import time
 import attr
 from collections import OrderedDict
 from typing import MutableMapping, cast
-from homeassistant.loader import bind_hass
 from homeassistant.core import (callback, HomeAssistant)
 from homeassistant.helpers.storage import Store
 
-from homeassistant.const import (
-    STATE_ALARM_ARMED_AWAY,
-    STATE_ALARM_ARMED_HOME,
-    STATE_ALARM_ARMED_NIGHT,
-    STATE_ALARM_ARMED_CUSTOM_BYPASS,
-    STATE_ALARM_ARMED_VACATION
-)
+from homeassistant.components.alarm_control_panel import CodeFormat
 
-from homeassistant.components.alarm_control_panel import (
-    FORMAT_NUMBER as CODE_FORMAT_NUMBER,
-)
-
-from .const import DOMAIN
+from . import const
 
 from .sensors import (
     SENSOR_TYPE_OTHER,
@@ -29,9 +18,10 @@ from .helpers import omit
 
 _LOGGER = logging.getLogger(__name__)
 
-DATA_REGISTRY = f"{DOMAIN}_storage"
-STORAGE_KEY = f"{DOMAIN}.storage"
-STORAGE_VERSION = 6
+DATA_REGISTRY = f"{const.DOMAIN}_storage"
+STORAGE_KEY = f"{const.DOMAIN}.storage"
+STORAGE_VERSION_MAJOR = 6
+STORAGE_VERSION_MINOR = 3
 SAVE_DELAY = 10
 
 
@@ -73,11 +63,11 @@ class AreaEntry:
     area_id = attr.ib(type=str, default=None)
     name = attr.ib(type=str, default=None)
     modes = attr.ib(type=[str, ModeEntry], default={
-        STATE_ALARM_ARMED_AWAY: ModeEntry(),
-        STATE_ALARM_ARMED_HOME: ModeEntry(),
-        STATE_ALARM_ARMED_NIGHT: ModeEntry(),
-        STATE_ALARM_ARMED_CUSTOM_BYPASS: ModeEntry(),
-        STATE_ALARM_ARMED_VACATION: ModeEntry()
+        const.CONF_ALARM_ARMED_AWAY: ModeEntry(),
+        const.CONF_ALARM_ARMED_HOME: ModeEntry(),
+        const.CONF_ALARM_ARMED_NIGHT: ModeEntry(),
+        const.CONF_ALARM_ARMED_CUSTOM_BYPASS: ModeEntry(),
+        const.CONF_ALARM_ARMED_VACATION: ModeEntry()
     })
 
 
@@ -86,8 +76,9 @@ class Config:
     """(General) Config storage Entry."""
 
     code_arm_required = attr.ib(type=bool, default=False)
+    code_mode_change_required = attr.ib(type=bool, default=False)
     code_disarm_required = attr.ib(type=bool, default=False)
-    code_format = attr.ib(type=str, default=CODE_FORMAT_NUMBER)
+    code_format = attr.ib(type=str, default=CodeFormat.NUMBER)
     disarm_after_trigger = attr.ib(type=bool, default=False)
     master = attr.ib(type=MasterConfig, default=MasterConfig())
     mqtt = attr.ib(type=MqttConfig, default=MqttConfig())
@@ -199,12 +190,11 @@ def parse_automation_entry(data: dict):
         output["enabled"] = data["enabled"]
     return output
 
-
 class MigratableStore(Store):
-    async def _async_migrate_func(self, old_version, data: dict):
+    async def _async_migrate_func(self, old_major_version: int, old_minor_version: int, data: dict):
 
         def migrate_automation(data):
-            if old_version <= 2:
+            if old_major_version <= 2:
                 data["triggers"] = [
                     {
                         "event": el["state"] if "state" in el else el["event"],
@@ -216,7 +206,7 @@ class MigratableStore(Store):
 
                 data["type"] = "notification" if "is_notification" in data and data["is_notification"] else "action"
 
-            if old_version <= 5:
+            if old_major_version <= 5:
                 data["actions"] = [
                     {
                         "service": el.get("service"),
@@ -228,7 +218,7 @@ class MigratableStore(Store):
 
             return attr.asdict(AutomationEntry(**parse_automation_entry(data)))
 
-        if old_version == 1:
+        if old_major_version == 1:
             area_id = str(int(time.time()))
             data["areas"] = [
                 attr.asdict(AreaEntry(**{
@@ -249,7 +239,7 @@ class MigratableStore(Store):
                 for sensor in data["sensors"]:
                     sensor["area"] = area_id
 
-        if old_version <= 3:
+        if old_major_version <= 3:
             data["sensors"] = [
                 attr.asdict(SensorEntry(
                     **{
@@ -264,7 +254,7 @@ class MigratableStore(Store):
                 for sensor in data["sensors"]
             ]
 
-        if old_version <= 4:
+        if old_major_version <= 4:
             data["sensors"] = [
                 attr.asdict(SensorEntry(
                     **omit(sensor, ["name"]),
@@ -276,6 +266,23 @@ class MigratableStore(Store):
             migrate_automation(automation)
             for automation in data["automations"]
         ]
+
+        if old_major_version <= 5 or (old_major_version == 6 and old_minor_version < 2):
+            data["config"] = attr.asdict(Config(
+                **omit(data["config"], ["code_mode_change_required"]),
+                code_mode_change_required=data["config"]["code_arm_required"]
+            ))
+
+        if old_major_version <= 5 or (old_major_version == 6 and old_minor_version < 3):
+            data["sensor_groups"] = [
+                attr.asdict(SensorGroupEntry(
+                    **{
+                        **omit(sensorGroup, ["entities"]),
+                        "entities": list(set(sensorGroup["entities"]))
+                    }
+                ))
+                for sensorGroup in data["sensor_groups"]
+            ]
 
         return data
 
@@ -292,7 +299,7 @@ class AlarmoStorage:
         self.users: MutableMapping[str, UserEntry] = {}
         self.automations: MutableMapping[str, AutomationEntry] = {}
         self.sensor_groups: MutableMapping[str, SensorGroupEntry] = {}
-        self._store = MigratableStore(hass, STORAGE_VERSION, STORAGE_KEY)
+        self._store = MigratableStore(hass, STORAGE_VERSION_MAJOR, STORAGE_KEY, minor_version=STORAGE_VERSION_MINOR)
 
     async def async_load(self) -> None:
         """Load the registry of schedule entries."""
@@ -307,6 +314,7 @@ class AlarmoStorage:
         if data is not None:
             config = Config(
                 code_arm_required=data["config"]["code_arm_required"],
+                code_mode_change_required=data["config"]["code_mode_change_required"],
                 code_disarm_required=data["config"]["code_disarm_required"],
                 code_format=data["config"]["code_format"],
                 disarm_after_trigger=data["config"]["disarm_after_trigger"]
@@ -369,7 +377,7 @@ class AlarmoStorage:
         self.async_create_area({
             "name": "Alarmo",
             "modes": {
-                STATE_ALARM_ARMED_AWAY: attr.asdict(
+                const.CONF_ALARM_ARMED_AWAY: attr.asdict(
                     ModeEntry(
                         enabled=True,
                         exit_time=60,
@@ -377,7 +385,7 @@ class AlarmoStorage:
                         trigger_time=1800
                     )
                 ),
-                STATE_ALARM_ARMED_HOME: attr.asdict(
+                const.CONF_ALARM_ARMED_HOME: attr.asdict(
                     ModeEntry(
                         enabled=True,
                         trigger_time=1800
@@ -657,7 +665,6 @@ class AlarmoStorage:
         return new
 
 
-@bind_hass
 async def async_get_registry(hass: HomeAssistant) -> AlarmoStorage:
     """Return alarmo storage instance."""
     task = hass.data.get(DATA_REGISTRY)
