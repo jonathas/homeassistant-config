@@ -217,33 +217,23 @@
 - id: '1692454903328'
   alias: You've got mail (Motion)
   description: ''
-  trigger:
+  triggers:
   - type: motion
-    platform: device
     device_id: cddb8b9d37d9b2eeb8aded7e2ca691e5
     entity_id: 2c3c4208a8b03613bd6a2d28cb9bd542
     domain: binary_sensor
-  condition: []
-  action:
+    trigger: device
+  conditions: []
+  actions:
   - parallel:
-    - service: notify.mobile_app_jon_iphone
-      data:
+    - data:
         message: You've got mail!
         title: Mailbox
-    - service: notify.mobile_app_sm_g973f
-      data:
-        title: Mailbox
-        message: You've got mail!
-    - service: notify.mobile_app_tablet_ags2_w09
-      data:
+      action: notify.mobile_app_jon_iphone
+    - data:
         message: You've got mail!
         title: Mailbox
-    - service: notify.alexa_media_kitchen_s_alexa
-      data:
-        message: You've got mail!
-    - service: notify.alexa_media_office_s_alexa
-      data:
-        message: You've got mail!
+      action: notify.mobile_app_tablet_ags2_w09
   mode: single
 - id: '1693585613915'
   alias: Low battery on sensors notification
@@ -522,8 +512,8 @@
     brightness_pct: 100
   mode: single
 - id: '1734094292918'
-  alias: Open shutters in the sunrise
-  description: Open shutters in the sunrise
+  alias: Open shutters after sunrise
+  description: Open shutters after sunrise
   triggers:
   - trigger: sun
     event: sunrise
@@ -541,8 +531,8 @@
     enabled: false
   mode: single
 - id: '1734094507472'
-  alias: Close shutters in the sunset
-  description: Close shutters in the sunset
+  alias: Close shutters after sunset
+  description: Close shutters after sunset
   triggers:
   - trigger: sun
     event: sunset
@@ -602,6 +592,7 @@
       hours: 0
       minutes: 0
       seconds: 10
+    from: 'on'
   conditions:
   - condition: time
     after: 05:00:00
@@ -651,4 +642,48 @@
     domain: cover
     entity_id: b7289e0524cd2ce2c8e54560a107fb11
     type: close
+  mode: single
+- id: '1735209040972'
+  alias: Turn dehumidifier on when humidity is too high
+  description: ''
+  triggers:
+  - type: humidity
+    device_id: 98551d502342f3f9002cedc5b3be90f0
+    entity_id: b377a919620fc2999ce5e9972760b223
+    domain: sensor
+    trigger: device
+    above: 57
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: 8ad864df05a51c2be3133cdb2460e425
+    entity_id: 7ab10edf555f159316a05c62447eb434
+    domain: humidifier
+  mode: single
+- id: '1735209285489'
+  alias: Turn dehumidifier off when humidity is not high anymore
+  description: ''
+  triggers:
+  - type: humidity
+    device_id: 98551d502342f3f9002cedc5b3be90f0
+    entity_id: b377a919620fc2999ce5e9972760b223
+    domain: sensor
+    trigger: device
+    below: 46
+  conditions: []
+  actions:
+  - type: turn_off
+    device_id: 8ad864df05a51c2be3133cdb2460e425
+    entity_id: 7ab10edf555f159316a05c62447eb434
+    domain: humidifier
+  - action: notify.mobile_app_jon_iphone
+    metadata: {}
+    data:
+      title: Dehumidifier
+      message: Remove water from the dehumidifier!
+  - action: notify.persistent_notification
+    metadata: {}
+    data:
+      message: Remove water from the dehumidifier!
+      title: Dehumidifier
   mode: single

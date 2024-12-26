@@ -24,6 +24,10 @@ scene: !include scenes.yaml
 #    name: xiaomi_heater
 #    model: zhimi.heater.mc2
 
+homeassistant:
+  auth_mfa_modules:
+    - type: totp
+
 http:
   use_x_forwarded_for: true
   trusted_proxies:
