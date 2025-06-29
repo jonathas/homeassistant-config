@@ -16,12 +16,8 @@
   conditions: []
   actions:
   - type: turn_off
-    device_id: 029f6368dd8596d462f1f686841d99a3
-    entity_id: b554a8e128a23d0afaa11f767f13b54a
-    domain: switch
-  - type: turn_off
-    device_id: 029f6368dd8596d462f1f686841d99a3
-    entity_id: ab2a5cf760d717c374b499a2e4363cc5
+    device_id: b6d0a02d9e47df20101ab4e13b1e8bba
+    entity_id: 9fa2bb7bf34d64d7e0b137ace084a6ce
     domain: switch
   - data:
       message: Sleep machine off
@@ -102,8 +98,8 @@
     entity_id: 2e486700a34beb8e888e44c0b89665ba
     domain: light
   - type: turn_on
-    device_id: 029f6368dd8596d462f1f686841d99a3
-    entity_id: b554a8e128a23d0afaa11f767f13b54a
+    device_id: b6d0a02d9e47df20101ab4e13b1e8bba
+    entity_id: 9fa2bb7bf34d64d7e0b137ace084a6ce
     domain: switch
   mode: single
 - id: '1691961908252'
@@ -439,12 +435,8 @@
   conditions: []
   actions:
   - type: turn_on
-    device_id: 029f6368dd8596d462f1f686841d99a3
-    entity_id: b554a8e128a23d0afaa11f767f13b54a
-    domain: switch
-  - type: turn_on
-    device_id: 029f6368dd8596d462f1f686841d99a3
-    entity_id: ab2a5cf760d717c374b499a2e4363cc5
+    device_id: b6d0a02d9e47df20101ab4e13b1e8bba
+    entity_id: 9fa2bb7bf34d64d7e0b137ace084a6ce
     domain: switch
   - entity_id: all
     action: light.turn_off
@@ -480,12 +472,8 @@
     enabled: false
     action: light.turn_off
   - type: turn_on
-    device_id: 029f6368dd8596d462f1f686841d99a3
-    entity_id: b554a8e128a23d0afaa11f767f13b54a
-    domain: switch
-  - type: turn_on
-    device_id: 029f6368dd8596d462f1f686841d99a3
-    entity_id: ab2a5cf760d717c374b499a2e4363cc5
+    device_id: b6d0a02d9e47df20101ab4e13b1e8bba
+    entity_id: 9fa2bb7bf34d64d7e0b137ace084a6ce
     domain: switch
   - type: turn_on
     device_id: dd62ddc5b747cdaf29a815419cb989f4
@@ -547,7 +535,7 @@
     domain: button
     entity_id: 396bfc8c42f7722b3286779dcaaff062
     type: press
-    enabled: false
+    enabled: true
   mode: single
 - id: '1735154738113'
   alias: Turn bedside lamp off when in bed
@@ -559,11 +547,11 @@
     to: 'on'
     for:
       hours: 0
-      minutes: 1
-      seconds: 0
+      minutes: 0
+      seconds: 30
   conditions:
   - condition: time
-    after: '22:00:00'
+    after: '21:30:00'
     before: 05:00:00
     weekday:
     - sun
@@ -653,12 +641,31 @@
     domain: sensor
     trigger: device
     above: 57
-  conditions: []
+  conditions:
+  - condition: device
+    type: is_off
+    device_id: 8ad864df05a51c2be3133cdb2460e425
+    entity_id: 7ab10edf555f159316a05c62447eb434
+    domain: humidifier
   actions:
   - type: turn_on
     device_id: 8ad864df05a51c2be3133cdb2460e425
     entity_id: 7ab10edf555f159316a05c62447eb434
     domain: humidifier
+  - action: notify.mobile_app_jon_iphone
+    metadata: {}
+    data:
+      title: Dehumidifier
+      message: Humidity is too high! Turning the dehumidifier on!
+  - action: notify.mobile_app_iphone_de_estela
+    metadata: {}
+    data:
+      message: Humidity is too high! Turning the dehumidifier on!
+      title: Dehumidifier
+  - device_id: 30f3bea3ba2eedf57fe252950b69a03f
+    domain: button
+    entity_id: 396bfc8c42f7722b3286779dcaaff062
+    type: press
   mode: single
 - id: '1735209285489'
   alias: Turn dehumidifier off when humidity is not high anymore
@@ -670,7 +677,12 @@
     domain: sensor
     trigger: device
     below: 46
-  conditions: []
+  conditions:
+  - condition: device
+    type: is_on
+    device_id: 8ad864df05a51c2be3133cdb2460e425
+    entity_id: 7ab10edf555f159316a05c62447eb434
+    domain: humidifier
   actions:
   - type: turn_off
     device_id: 8ad864df05a51c2be3133cdb2460e425
@@ -682,6 +694,38 @@
       title: Dehumidifier
       message: Remove water from the dehumidifier!
   - action: notify.persistent_notification
+    metadata: {}
+    data:
+      message: Remove water from the dehumidifier!
+      title: Dehumidifier
+  - action: notify.mobile_app_iphone_de_estela
+    metadata: {}
+    data:
+      message: Remove water from the dehumidifier!
+      title: Dehumidifier
+  mode: single
+- id: '1735506012910'
+  alias: Turn dehumidifier off when its humidity falls below a value
+  description: ''
+  triggers:
+  - type: humidity
+    device_id: 8ad864df05a51c2be3133cdb2460e425
+    entity_id: d9c77693b1552ec48da4c431df5a2478
+    domain: sensor
+    trigger: device
+    below: 46
+  conditions:
+  - condition: device
+    type: is_on
+    device_id: 8ad864df05a51c2be3133cdb2460e425
+    entity_id: 7ab10edf555f159316a05c62447eb434
+    domain: humidifier
+  actions:
+  - type: turn_off
+    device_id: 8ad864df05a51c2be3133cdb2460e425
+    entity_id: 7ab10edf555f159316a05c62447eb434
+    domain: humidifier
+  - action: notify.mobile_app_jon_iphone
     metadata: {}
     data:
       message: Remove water from the dehumidifier!
