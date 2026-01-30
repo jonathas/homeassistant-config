@@ -498,6 +498,10 @@
     entity_id: 5888154a072713f62c48b0e400d291ca
     domain: light
     brightness_pct: 100
+  - type: turn_on
+    device_id: 4c236a9e9d1f3d83850458e750d0a64b
+    entity_id: 173126481b9dbbc04a9c7c03702b9be2
+    domain: fan
   mode: single
 - id: '1734094292918'
   alias: Open shutters after sunrise
@@ -681,12 +685,19 @@
     below: 45
     for:
       minutes: 3
+  - minutes: /5
+    trigger: time_pattern
+  - event: start
+    trigger: homeassistant
   conditions:
   - condition: device
     type: is_on
     device_id: 8ad864df05a51c2be3133cdb2460e425
     entity_id: 7ab10edf555f159316a05c62447eb434
     domain: humidifier
+  - condition: numeric_state
+    entity_id: sensor.bathroom_temperature_and_humidity_humidity
+    below: 45
   actions:
   - type: turn_off
     device_id: 8ad864df05a51c2be3133cdb2460e425
