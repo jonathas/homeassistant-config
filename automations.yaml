@@ -442,21 +442,21 @@
     action: light.turn_off
   mode: single
 - id: '1713084722052'
-  alias: Bathroom fan on if door closed
+  alias: Bathroom fan ON if door closed
   description: ''
-  trigger:
+  triggers:
   - type: not_opened
-    platform: device
     device_id: c59a2665845314328891a387d5aa23f1
     entity_id: d208a439f4d1de5612d31b08fe70897d
     domain: binary_sensor
-  condition:
+    trigger: device
+  conditions:
   - condition: device
     type: is_on
     device_id: 53b0f001e380e99402db43c79099a703
     entity_id: c4679ea464275c334d51c92466416432
     domain: light
-  action:
+  actions:
   - type: turn_on
     device_id: 53b0f001e380e99402db43c79099a703
     entity_id: 0e50149fed819e0d0cd7d540173f3ada
@@ -591,6 +591,7 @@
     - wed
     - thu
     - fri
+    - sat
   actions:
   - type: turn_on
     device_id: 7a77d0feeed093133858833de346247f
@@ -632,88 +633,54 @@
     type: close
   mode: single
 - id: '1735209040972'
-  alias: Turn dehumidifier on when humidity is too high
+  alias: Bathroom dehumidifier ON when humidity is too high
   description: ''
   triggers:
   - type: humidity
-    device_id: 98551d502342f3f9002cedc5b3be90f0
-    entity_id: b377a919620fc2999ce5e9972760b223
+    device_id: 370a6d9c40d455353fd24995d5bef4ee
+    entity_id: 3518b4aea078897dc00bb5b0cceb300b
     domain: sensor
     trigger: device
-    above: 57
+    above: 50
+    enabled: true
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  - minutes: /5
+    trigger: time_pattern
+  - event: start
+    trigger: homeassistant
   conditions:
   - condition: device
     type: is_off
     device_id: 8ad864df05a51c2be3133cdb2460e425
     entity_id: 7ab10edf555f159316a05c62447eb434
     domain: humidifier
+  - condition: device
+    type: is_humidity
+    device_id: 370a6d9c40d455353fd24995d5bef4ee
+    entity_id: 3518b4aea078897dc00bb5b0cceb300b
+    domain: sensor
+    above: 50
   actions:
   - type: turn_on
     device_id: 8ad864df05a51c2be3133cdb2460e425
     entity_id: 7ab10edf555f159316a05c62447eb434
     domain: humidifier
-  - action: notify.mobile_app_jon_iphone
-    metadata: {}
-    data:
-      title: Dehumidifier
-      message: Humidity is too high! Turning the dehumidifier on!
-  - action: notify.mobile_app_iphone_de_estela
-    metadata: {}
-    data:
-      message: Humidity is too high! Turning the dehumidifier on!
-      title: Dehumidifier
-  - device_id: 30f3bea3ba2eedf57fe252950b69a03f
-    domain: button
-    entity_id: 396bfc8c42f7722b3286779dcaaff062
-    type: press
-  mode: single
-- id: '1735209285489'
-  alias: Turn dehumidifier off when humidity is not high anymore
-  description: ''
-  triggers:
-  - type: humidity
-    device_id: 98551d502342f3f9002cedc5b3be90f0
-    entity_id: b377a919620fc2999ce5e9972760b223
-    domain: sensor
-    trigger: device
-    below: 46
-  conditions:
-  - condition: device
-    type: is_on
-    device_id: 8ad864df05a51c2be3133cdb2460e425
-    entity_id: 7ab10edf555f159316a05c62447eb434
-    domain: humidifier
-  actions:
-  - type: turn_off
-    device_id: 8ad864df05a51c2be3133cdb2460e425
-    entity_id: 7ab10edf555f159316a05c62447eb434
-    domain: humidifier
-  - action: notify.mobile_app_jon_iphone
-    metadata: {}
-    data:
-      title: Dehumidifier
-      message: Remove water from the dehumidifier!
-  - action: notify.persistent_notification
-    metadata: {}
-    data:
-      message: Remove water from the dehumidifier!
-      title: Dehumidifier
-  - action: notify.mobile_app_iphone_de_estela
-    metadata: {}
-    data:
-      message: Remove water from the dehumidifier!
-      title: Dehumidifier
   mode: single
 - id: '1735506012910'
-  alias: Turn dehumidifier off when its humidity falls below a value
+  alias: Bathroom dehumidifier OFF when humidity falls below 45
   description: ''
   triggers:
   - type: humidity
-    device_id: 8ad864df05a51c2be3133cdb2460e425
-    entity_id: d9c77693b1552ec48da4c431df5a2478
+    device_id: 370a6d9c40d455353fd24995d5bef4ee
+    entity_id: 3518b4aea078897dc00bb5b0cceb300b
     domain: sensor
     trigger: device
-    below: 46
+    below: 45
+    for:
+      minutes: 3
   conditions:
   - condition: device
     type: is_on
@@ -725,9 +692,213 @@
     device_id: 8ad864df05a51c2be3133cdb2460e425
     entity_id: 7ab10edf555f159316a05c62447eb434
     domain: humidifier
-  - action: notify.mobile_app_jon_iphone
-    metadata: {}
+  mode: single
+- id: '1756285901700'
+  alias: Jon's desk light switch
+  description: ''
+  triggers:
+  - device_id: 9b9cd36aa91d63bde113aac5d20af4a5
+    domain: zha
+    type: remote_button_short_press
+    subtype: button_1
+    trigger: device
+  conditions: []
+  actions:
+  - type: toggle
+    device_id: b7082b22f2f69f275150e0addafb145c
+    entity_id: 94e8353861a45c8882235884541dbc0a
+    domain: switch
+  mode: single
+- id: '1756286053522'
+  alias: Digital frame - Start charging (<=50%)
+  description: ''
+  triggers:
+  - type: battery_level
+    device_id: 4fee60e3ec5d799384ec378e0c571cc1
+    entity_id: ff87914abb6b908215c58172476176c1
+    domain: sensor
+    trigger: device
+    below: 51
+  - minutes: /5
+    trigger: time_pattern
+  - event: start
+    trigger: homeassistant
+  conditions:
+  - condition: numeric_state
+    entity_id: sensor.lenovo_yt_j706f_battery_level
+    below: 51
+  actions:
+  - type: turn_on
+    device_id: 104397c7aefc20d21cbf23ce0b609f74
+    entity_id: c7770db19423ae9b92107ca5986c5261
+    domain: switch
+  mode: single
+- id: '1756286172280'
+  alias: Digital frame - Stop charging (>=85%)
+  description: ''
+  triggers:
+  - type: battery_level
+    device_id: 4fee60e3ec5d799384ec378e0c571cc1
+    entity_id: ff87914abb6b908215c58172476176c1
+    domain: sensor
+    trigger: device
+    above: 84
+  - minutes: /5
+    trigger: time_pattern
+  - event: start
+    trigger: homeassistant
+  conditions:
+  - condition: numeric_state
+    entity_id: sensor.lenovo_yt_j706f_battery_level
+    above: 84
+  actions:
+  - type: turn_off
+    device_id: 104397c7aefc20d21cbf23ce0b609f74
+    entity_id: c7770db19423ae9b92107ca5986c5261
+    domain: switch
+  mode: single
+- id: '1757308211331'
+  alias: Start charging Digital Frame before it wakes up
+  description: ''
+  triggers:
+  - trigger: time
+    at: 06:55:00
+    weekday:
+    - sat
+    - fri
+    - thu
+    - wed
+    - tue
+    - mon
+    - sun
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: 104397c7aefc20d21cbf23ce0b609f74
+    entity_id: c7770db19423ae9b92107ca5986c5261
+    domain: switch
+  mode: single
+- id: '1768798243227'
+  alias: iPad running out of battery
+  description: ''
+  triggers:
+  - type: battery_level
+    device_id: 47f88c7e1a52e9ba7dcfeea9d3cf5fdd
+    entity_id: 99e6e2cce54ed90437adae52669eba2e
+    domain: sensor
+    trigger: device
+    below: 40
+  conditions: []
+  actions:
+  - data:
+      title: iPad running out of battery
+      message: Time to charge the iPad!
+    action: notify.mobile_app_jon_iphone
+  mode: single
+- id: '1769711283683'
+  alias: Bathroom dehumidifier tank is full
+  description: ''
+  triggers:
+  - type: problem
+    device_id: 8ad864df05a51c2be3133cdb2460e425
+    entity_id: 4534f8ece8e47c92055e54bc618b382f
+    domain: binary_sensor
+    trigger: device
+  conditions: []
+  actions:
+  - parallel:
+    - action: notify.mobile_app_jon_iphone
+      metadata: {}
+      data:
+        title: Bathroom Dehumidifier Tank Full
+        message: The bathroom dehumidifier tank is full. Please empty it to keep humidity
+          under control.
+    - action: notify.mobile_app_iphone_de_estela
+      metadata: {}
+      data:
+        message: The bathroom dehumidifier tank is full. Please empty it to keep humidity
+          under control.
+        title: Bathroom Dehumidifier Tank Full
+  mode: single
+- id: '1769791929647'
+  alias: Main Bedroom - Turn dehumidifier ON when humidity is too high
+  description: ''
+  triggers:
+  - entity_id: sensor.main_bedroom_temperature_and_humidity_humidity
+    above: 50
+    for: 00:01:00
+    trigger: numeric_state
+  - minutes: /5
+    trigger: time_pattern
+  - event: start
+    trigger: homeassistant
+  conditions:
+  - condition: state
+    entity_id: humidifier.xiaomi_lite_814e_dehumidifier
+    state: 'off'
+  - condition: numeric_state
+    entity_id: sensor.main_bedroom_temperature_and_humidity_humidity
+    above: 50
+  actions:
+  - target:
+      entity_id: humidifier.xiaomi_lite_814e_dehumidifier
     data:
-      message: Remove water from the dehumidifier!
-      title: Dehumidifier
+      humidity: 45
+    action: humidifier.set_humidity
+  - target:
+      entity_id: humidifier.xiaomi_lite_814e_dehumidifier
+    action: humidifier.turn_on
+  mode: single
+- id: '1769791973373'
+  alias: Main Bedroom - Turn dehumidifier OFF when humidity is OK
+  description: ''
+  triggers:
+  - entity_id: sensor.main_bedroom_temperature_and_humidity_humidity
+    below: 45
+    for: 00:10:00
+    trigger: numeric_state
+  - minutes: /5
+    trigger: time_pattern
+  - event: start
+    trigger: homeassistant
+  conditions:
+  - condition: state
+    entity_id: humidifier.xiaomi_lite_814e_dehumidifier
+    state: 'on'
+  - condition: numeric_state
+    entity_id: sensor.main_bedroom_temperature_and_humidity_humidity
+    below: 45
+  actions:
+  - target:
+      entity_id: humidifier.xiaomi_lite_814e_dehumidifier
+    action: humidifier.turn_off
+  mode: single
+- id: '1769792523307'
+  alias: Main Bedroom dehumidifier tank is full
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.xiaomi_lite_814e_device_fault
+    attribute: dehumidifier.fault
+    above: 0
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  conditions: []
+  actions:
+  - parallel:
+    - action: notify.mobile_app_jon_iphone
+      metadata: {}
+      data:
+        title: Main Bedroom Dehumidifier Tank Full
+        message: The main bedroom dehumidifier tank is full. Please empty it to keep
+          humidity under control.
+    - action: notify.mobile_app_iphone_de_estela
+      metadata: {}
+      data:
+        title: Main Bedroom Dehumidifier Tank Full
+        message: The main bedroom dehumidifier tank is full. Please empty it to keep
+          humidity under control.
   mode: single
