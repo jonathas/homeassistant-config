@@ -1,12 +1,3 @@
-- id: '1691842594162'
-  alias: Hall light (Motion)
-  description: ''
-  use_blueprint:
-    path: homeassistant/motion_light.yaml
-    input:
-      light_target:
-        device_id: 874292888d49081c268ee8e27b9c2605
-      motion_entity: binary_sensor.front_door_motion_sensor_motion
 - id: '1691847438428'
   alias: Turn sleep machines off (Daily schedule)
   description: ''
@@ -67,19 +58,20 @@
 - id: '1691961487180'
   alias: ' Turn on desk lights (NFC)'
   description: ''
-  trigger:
-  - platform: tag
-    tag_id: aee9d8aa-2b91-44df-bb4f-5c669b2d9f23
-  condition: []
-  action:
-  - type: turn_on
-    device_id: 27a6898e8c28c0ed2da7ca3cf2828467
-    entity_id: 22fdde003d535304af87fcafd5f75bb2
-    domain: switch
-  - type: turn_on
-    device_id: 7a77d0feeed093133858833de346247f
-    entity_id: be5cff5bca73a427a6cdc2dea999641a
-    domain: switch
+  triggers:
+  - tag_id: aee9d8aa-2b91-44df-bb4f-5c669b2d9f23
+    trigger: tag
+  conditions: []
+  actions:
+  - parallel:
+    - type: turn_on
+      device_id: b7082b22f2f69f275150e0addafb145c
+      entity_id: 94e8353861a45c8882235884541dbc0a
+      domain: switch
+    - type: turn_on
+      device_id: 7a77d0feeed093133858833de346247f
+      entity_id: be5cff5bca73a427a6cdc2dea999641a
+      domain: switch
   mode: single
 - id: '1691961708012'
   alias: Wind down (NFC)
@@ -119,22 +111,6 @@
   - type: turn_off
     device_id: 7a77d0feeed093133858833de346247f
     entity_id: be5cff5bca73a427a6cdc2dea999641a
-    domain: switch
-  mode: single
-- id: '1692386498657'
-  alias: Jon's desk light switch
-  description: ''
-  trigger:
-  - device_id: 9b9cd36aa91d63bde113aac5d20af4a5
-    domain: zha
-    platform: device
-    type: remote_button_short_press
-    subtype: button_1
-  condition: []
-  action:
-  - type: toggle
-    device_id: 27a6898e8c28c0ed2da7ca3cf2828467
-    entity_id: 22fdde003d535304af87fcafd5f75bb2
     domain: switch
   mode: single
 - id: '1692386610340'
@@ -390,11 +366,19 @@
     trigger: tag
   conditions: []
   actions:
+  - type: turn_off
+    device_id: a903c4e1d3271ec45ac8fc171f414e6d
+    entity_id: 521722dcb47ed9e00a39aea0d24e481e
+    domain: switch
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
+  - type: turn_on
+    device_id: a903c4e1d3271ec45ac8fc171f414e6d
+    entity_id: 521722dcb47ed9e00a39aea0d24e481e
+    domain: switch
   mode: single
 - id: '1695096160681'
   alias: Bedside lamp ON sets input ON
@@ -645,7 +629,7 @@
     entity_id: 3518b4aea078897dc00bb5b0cceb300b
     domain: sensor
     trigger: device
-    above: 50
+    above: 55
     enabled: true
     for:
       hours: 0
@@ -666,7 +650,7 @@
     device_id: 370a6d9c40d455353fd24995d5bef4ee
     entity_id: 3518b4aea078897dc00bb5b0cceb300b
     domain: sensor
-    above: 50
+    above: 55
   actions:
   - type: turn_on
     device_id: 8ad864df05a51c2be3133cdb2460e425
@@ -674,7 +658,7 @@
     domain: humidifier
   mode: single
 - id: '1735506012910'
-  alias: Bathroom dehumidifier OFF when humidity falls below 45
+  alias: Bathroom dehumidifier OFF when humidity falls below
   description: ''
   triggers:
   - type: humidity
@@ -682,9 +666,7 @@
     entity_id: 3518b4aea078897dc00bb5b0cceb300b
     domain: sensor
     trigger: device
-    below: 45
-    for:
-      minutes: 3
+    below: 50
   - minutes: /5
     trigger: time_pattern
   - event: start
@@ -697,7 +679,7 @@
     domain: humidifier
   - condition: numeric_state
     entity_id: sensor.bathroom_temperature_and_humidity_humidity
-    below: 45
+    below: 50
   actions:
   - type: turn_off
     device_id: 8ad864df05a51c2be3133cdb2460e425
@@ -798,7 +780,7 @@
     entity_id: 99e6e2cce54ed90437adae52669eba2e
     domain: sensor
     trigger: device
-    below: 40
+    below: 45
   conditions: []
   actions:
   - data:
@@ -864,9 +846,13 @@
   alias: Main Bedroom - Turn dehumidifier OFF when humidity is OK
   description: ''
   triggers:
-  - entity_id: sensor.main_bedroom_temperature_and_humidity_humidity
-    below: 45
-    for: 00:10:00
+  - entity_id:
+    - sensor.main_bedroom_temperature_and_humidity_humidity
+    below: 49
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
     trigger: numeric_state
   - minutes: /5
     trigger: time_pattern
@@ -878,7 +864,7 @@
     state: 'on'
   - condition: numeric_state
     entity_id: sensor.main_bedroom_temperature_and_humidity_humidity
-    below: 45
+    below: 49
   actions:
   - target:
       entity_id: humidifier.xiaomi_lite_814e_dehumidifier
