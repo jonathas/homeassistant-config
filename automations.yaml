@@ -482,10 +482,6 @@
     entity_id: 5888154a072713f62c48b0e400d291ca
     domain: light
     brightness_pct: 100
-  - type: turn_on
-    device_id: 4c236a9e9d1f3d83850458e750d0a64b
-    entity_id: 173126481b9dbbc04a9c7c03702b9be2
-    domain: fan
   mode: single
 - id: '1734094292918'
   alias: Open shutters after sunrise
@@ -835,12 +831,12 @@
   actions:
   - target:
       entity_id: humidifier.xiaomi_lite_814e_dehumidifier
+    action: humidifier.turn_on
+  - target:
+      entity_id: humidifier.xiaomi_lite_814e_dehumidifier
     data:
       humidity: 45
     action: humidifier.set_humidity
-  - target:
-      entity_id: humidifier.xiaomi_lite_814e_dehumidifier
-    action: humidifier.turn_on
   mode: single
 - id: '1769791973373'
   alias: Main Bedroom - Turn dehumidifier OFF when humidity is OK
@@ -898,4 +894,102 @@
         title: Main Bedroom Dehumidifier Tank Full
         message: The main bedroom dehumidifier tank is full. Please empty it to keep
           humidity under control.
+  mode: single
+- id: '1770120978553'
+  alias: Children's Bedroom dehumidifier tank is full
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.xiaomi_lite_d6b4_device_fault
+    attribute: dehumidifier.fault
+    above: 0
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  conditions: []
+  actions:
+  - parallel:
+    - action: notify.mobile_app_jon_iphone
+      metadata: {}
+      data:
+        title: Children's Bedroom Dehumidifier Tank Full
+        message: The children's bedroom dehumidifier tank is full. Please empty it
+          to keep humidity under control.
+    - action: notify.mobile_app_iphone_de_estela
+      metadata: {}
+      data:
+        title: Children's Bedroom Dehumidifier Tank Full
+        message: The children's bedroom dehumidifier tank is full. Please empty it
+          to keep humidity under control.
+  mode: single
+- id: '1770121168587'
+  alias: Children's Bedroom - Turn dehumidifier OFF when humidity is OK
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.children_s_bedroom_temperature_and_humidity_humidity
+    below: 49
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    trigger: numeric_state
+  - minutes: /5
+    trigger: time_pattern
+  - event: start
+    trigger: homeassistant
+  conditions:
+  - condition: state
+    entity_id: humidifier.xiaomi_lite_d6b4_dehumidifier
+    state:
+    - 'on'
+  - condition: numeric_state
+    entity_id: sensor.children_s_bedroom_temperature_and_humidity_humidity
+    below: 49
+  actions:
+  - target:
+      entity_id:
+      - humidifier.xiaomi_lite_d6b4_dehumidifier
+    action: humidifier.turn_off
+    data: {}
+  mode: single
+- id: '1770121284386'
+  alias: Children's Bedroom - Turn dehumidifier ON when humidity is too high
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.children_s_bedroom_temperature_and_humidity_humidity
+    above: 50
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+    trigger: numeric_state
+  - minutes: /5
+    trigger: time_pattern
+  - event: start
+    trigger: homeassistant
+  conditions:
+  - condition: state
+    entity_id: humidifier.xiaomi_lite_d6b4_dehumidifier
+    state:
+    - 'off'
+  - condition: numeric_state
+    entity_id: sensor.children_s_bedroom_temperature_and_humidity_humidity
+    above: 50
+  actions:
+  - target:
+      entity_id:
+      - humidifier.xiaomi_lite_d6b4_dehumidifier
+    action: humidifier.turn_on
+    data: {}
+  - target:
+      entity_id:
+      - humidifier.xiaomi_lite_d6b4_dehumidifier
+    data:
+      humidity: 45
+    action: humidifier.set_humidity
   mode: single
