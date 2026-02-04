@@ -186,27 +186,6 @@
     target:
       device_id: 4c236a9e9d1f3d83850458e750d0a64b
   mode: single
-- id: '1692454903328'
-  alias: You've got mail (Motion)
-  description: ''
-  triggers:
-  - type: motion
-    device_id: cddb8b9d37d9b2eeb8aded7e2ca691e5
-    entity_id: 2c3c4208a8b03613bd6a2d28cb9bd542
-    domain: binary_sensor
-    trigger: device
-  conditions: []
-  actions:
-  - parallel:
-    - data:
-        message: You've got mail!
-        title: Mailbox
-      action: notify.mobile_app_jon_iphone
-    - data:
-        message: You've got mail!
-        title: Mailbox
-      action: notify.mobile_app_tablet_ags2_w09
-  mode: single
 - id: '1693585613915'
   alias: Low battery on sensors notification
   description: ''
@@ -997,7 +976,7 @@
     action: humidifier.set_humidity
   mode: single
 - id: '1770208822184'
-  alias: Start my work day
+  alias: Office button clicked (Start my work day)
   description: ''
   triggers:
   - domain: mqtt
@@ -1019,3 +998,24 @@
       domain: light
       brightness_pct: 100
   mode: single
+- id: '1770227129972'
+  alias: Mailbox - Notify on motion
+  description: ''
+  triggers:
+  - entity_id: binary_sensor.aqara_p1_mailbox_occupancy
+    from: 'off'
+    to: 'on'
+    trigger: state
+  actions:
+  - parallel:
+    - action: notify.mobile_app_jon_iphone
+      metadata: {}
+      data:
+        title: "\U0001F4EC Mailbox"
+        message: You've got a new letter!
+    - action: notify.mobile_app_iphone_de_estela
+      metadata: {}
+      data:
+        title: "\U0001F4EC Mailbox"
+        message: You've got a new letter!
+      enabled: false

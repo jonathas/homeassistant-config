@@ -46,4 +46,10 @@ homeassistant:
   enabled: true
 devices:
   '0x84fd27fffe0e7e62':
-    friendly_name: Office button
+    friendly_name: office_button
+  '0xbc8d7efffefc0f7e':
+    friendly_name: zigbee_router_hallway
+  '0x54ef44100143cf3c':
+    friendly_name: aqara_p1_mailbox
+    occupancy_timeout: 90
+    no_occupancy_since: []
