@@ -1,0 +1,49 @@
+version: 5
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://core-mosquitto:1883
+  user: addons
+  password: hei1luyeiqu0Oogo9gao8pheiyae2aenahnaeV3ekieceeGhae0eiye3ahng4oan
+serial:
+  port: /dev/ttyUSB0
+  adapter: ember
+  baudrate: 115200
+  rtscts: false
+advanced:
+  log_level: info
+  channel: 15
+  network_key:
+    - 168
+    - 96
+    - 26
+    - 24
+    - 189
+    - 209
+    - 52
+    - 0
+    - 232
+    - 8
+    - 182
+    - 196
+    - 233
+    - 34
+    - 51
+    - 7
+  pan_id: 53657
+  ext_pan_id:
+    - 105
+    - 227
+    - 34
+    - 204
+    - 211
+    - 95
+    - 46
+    - 8
+frontend:
+  enabled: true
+  port: 8099
+homeassistant:
+  enabled: true
+devices:
+  '0x84fd27fffe0e7e62':
+    friendly_name: Office button

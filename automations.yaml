@@ -980,6 +980,9 @@
   - condition: numeric_state
     entity_id: sensor.children_s_bedroom_temperature_and_humidity_humidity
     above: 50
+  - condition: time
+    after: 07:00:00
+    before: '21:00:00'
   actions:
   - target:
       entity_id:
@@ -992,4 +995,27 @@
     data:
       humidity: 45
     action: humidifier.set_humidity
+  mode: single
+- id: '1770208822184'
+  alias: Start my work day
+  description: ''
+  triggers:
+  - domain: mqtt
+    device_id: 4ab0de2aafdcef9bbf7c922170b9e32c
+    type: action
+    subtype: single
+    trigger: device
+  conditions: []
+  actions:
+  - parallel:
+    - device_id: f98d06aeb44a5b9a6d822ba9a77a22c6
+      domain: cover
+      entity_id: 35aebba38e8128762776d3ee2bb4fddc
+      type: set_position
+      position: 50
+    - type: turn_on
+      device_id: 209492e941442d2a94b8dbb122e64f71
+      entity_id: 86c31d72ec9c8acb21d7f1344a8ad01f
+      domain: light
+      brightness_pct: 100
   mode: single
