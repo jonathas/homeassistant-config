@@ -39,6 +39,7 @@ advanced:
     - 95
     - 46
     - 8
+  last_seen: ISO_8601
 frontend:
   enabled: true
   port: 8099
@@ -53,3 +54,5 @@ devices:
     friendly_name: aqara_p1_mailbox
     occupancy_timeout: 90
     no_occupancy_since: []
+availability:
+  enabled: true

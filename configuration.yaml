@@ -38,3 +38,11 @@ http:
 duckdns:
   domain: !secret duckdns_domain
   access_token: !secret duckdns_access_token
+
+mqtt:
+  binary_sensor:
+    - name: "Zigbee Router Hallway Availability"
+      state_topic: "zigbee2mqtt/zigbee_router_hallway/availability"
+      payload_on: "online"
+      payload_off: "offline"
+      device_class: connectivity

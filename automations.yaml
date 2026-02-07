@@ -1018,4 +1018,98 @@
       data:
         title: "\U0001F4EC Mailbox"
         message: You've got a new letter!
-      enabled: false
+      enabled: true
+- id: '1770229191562'
+  alias: Children's Bedroom - Turn dehumidifier OFF after 21:00
+  description: ''
+  triggers:
+  - minutes: /5
+    trigger: time_pattern
+  - event: start
+    trigger: homeassistant
+  conditions:
+  - condition: state
+    entity_id: humidifier.xiaomi_lite_d6b4_dehumidifier
+    state:
+    - 'on'
+  - condition: time
+    after: '21:00:00'
+  actions:
+  - target:
+      entity_id:
+      - humidifier.xiaomi_lite_d6b4_dehumidifier
+    action: humidifier.turn_off
+    data: {}
+  mode: single
+- id: '1770455349447'
+  alias: Office button double clicked (turn off the office)
+  description: ''
+  triggers:
+  - domain: mqtt
+    device_id: 4ab0de2aafdcef9bbf7c922170b9e32c
+    type: action
+    subtype: double
+    trigger: device
+  conditions: []
+  actions:
+  - parallel:
+    - device_id: f98d06aeb44a5b9a6d822ba9a77a22c6
+      domain: button
+      entity_id: e7010a7300c60274af32e55aa8f5e8b6
+      type: press
+    - type: turn_off
+      device_id: 209492e941442d2a94b8dbb122e64f71
+      entity_id: 86c31d72ec9c8acb21d7f1344a8ad01f
+      domain: light
+  mode: single
+- id: '1770487342153'
+  alias: Notify if Zigbee Router Hallway Offline
+  description: ''
+  triggers:
+  - entity_id: binary_sensor.zigbee_router_hallway_availability
+    to: 'off'
+    for: 00:05:00
+    trigger: state
+  conditions: []
+  actions:
+  - parallel:
+    - action: notify.persistent_notification
+      metadata: {}
+      data:
+        message: The hallway Zigbee router has been offline for more than 5 minutes.
+          Power bank may be empty.
+        title: ⚠ Zigbee Router Offline
+    - action: notify.mobile_app_jon_iphone
+      metadata: {}
+      data:
+        title: ⚠ Zigbee Router Offline
+        message: The hallway Zigbee router has been offline for more than 5 minutes.
+          Power bank may be empty.
+    - target:
+        entity_id: input_boolean.zigbee_router_hallway_was_offline
+      action: input_boolean.turn_on
+  mode: single
+- id: '1770487523069'
+  alias: Notify Zigbee Router Back Online
+  triggers:
+  - entity_id: binary_sensor.zigbee_router_hallway_availability
+    to: 'on'
+    trigger: state
+  conditions:
+  - condition: state
+    entity_id: input_boolean.zigbee_router_hallway_was_offline
+    state: 'on'
+  actions:
+  - parallel:
+    - data:
+        title: ✅ Zigbee Router Online
+        message: The hallway Zigbee router is back online.
+      action: persistent_notification.create
+    - data:
+        title: ✅ Zigbee Router Online
+        message: The hallway Zigbee router is back online.
+      action: notify.mobile_app_jon_iphone
+  - target:
+      entity_id: input_boolean.zigbee_router_hallway_was_offline
+    action: input_boolean.turn_off
+  mode: single
